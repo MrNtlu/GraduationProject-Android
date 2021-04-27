@@ -1,5 +1,13 @@
 <resources>
     <string name="app_name">localsocialmedia</string>
+
+    <!-- Dialog -->
+    <string name="error_">Error!</string>
+    <string name="ok_">OK!</string>
+    <string name="are_you_sure">Are You Sure?</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
