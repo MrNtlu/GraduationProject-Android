@@ -6,5 +6,14 @@
 
         <attr name="contentTextColor" format="color"/>
         <attr name="contentBackground" format="color"/>
+
+        <attr name="editTextColor" format="color"/>
+        <attr name="editTextHintColor" format="color"/>
+        <attr name="editTextBackgroundColor" format="color"/>
+        <attr name="editTextLayoutBackgroundColor" format="color"/>
+
+        <attr name="buttonBackgroundColor" format="color"/>
+        <attr name="buttonTextColor" format="color"/>
+
     </declare-styleable>
 </resources>
