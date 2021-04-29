@@ -20,4 +20,9 @@
     <string name="password">Password</string>
     <string name="password_again">Password Again</string>
 
+    <string name="register_privacy"><![CDATA[Privacy & Policy]]></string>
+    <string name="register_agree">I agree to</string>
+    <string name="register_terms"><![CDATA[Terms & Conditions]]></string>
+    <string name="register_profile_image">Profile Image</string>
+
 </resources>

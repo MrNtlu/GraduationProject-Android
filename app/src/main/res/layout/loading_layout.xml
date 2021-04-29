@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="?attr/contentBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.airbnb.lottie.LottieAnimationView
@@ -26,7 +26,7 @@
         android:layout_marginTop="8dp"
         android:fontFamily="monospace"
         android:text="@string/loading_"
-        android:textColor="@color/black"
+        android:textColor="?attr/contentTextColor"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/lottieAnimationView"
