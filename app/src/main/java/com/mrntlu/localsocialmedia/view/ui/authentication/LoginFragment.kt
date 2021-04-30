@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
@@ -13,6 +14,7 @@ import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentLoginBinding
 import com.mrntlu.localsocialmedia.utils.MaterialDialogUtil
 import com.mrntlu.localsocialmedia.utils.isNotEmptyOrBlank
+import com.mrntlu.localsocialmedia.utils.printLog
 import com.yinglan.keyboard.HideUtil
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,11 +31,26 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         return binding.root
     }
 
+    //https://www.mobiler.dev/post/jetpack-datastore-entegrasyonu
+    //https://proandroiddev.com/welcome-datastore-good-bye-sharedpreferences-4bf68e70efdb
+    //https://medium.com/android-news/token-authorization-with-retrofit-android-oauth-2-0-747995c79720
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val authActivity = activity as AuthenticationActivity
         navController = Navigation.findNavController(view)
 
+        authActivity.userManager.userEmailFlow.asLiveData().observe(viewLifecycleOwner,{
+            if (it != null){
+                printLog("User email is $it")
+            }else{
+                setFragment()
+            }
+        })
+    }
+
+    private fun setFragment(){
         setListeners()
+
     }
 
     private fun setListeners() {
