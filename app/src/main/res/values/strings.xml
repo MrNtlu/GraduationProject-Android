@@ -24,5 +24,7 @@
     <string name="register_agree">I agree to</string>
     <string name="register_terms"><![CDATA[Terms & Conditions]]></string>
     <string name="register_profile_image">Profile Image</string>
+    <string name="username">Username</string>
+    <string name="register_please_enter_your_">Please enter your </string>
 
 </resources>

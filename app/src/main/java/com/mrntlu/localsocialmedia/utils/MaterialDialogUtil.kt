@@ -17,6 +17,17 @@ class MaterialDialogUtil {
             }
         }
 
+        fun showInfoDialog(context: Context, title: String, message: String) {
+            MaterialDialog(context).show {
+                title(text = title)
+                message(text = message)
+                negativeButton(text = context.getString(R.string.ok_)) {
+                    it.dismiss()
+                }
+                cornerRadius(6f)
+            }
+        }
+
         fun setDialog(context: Context, message: String, dialogButton: DialogButtons) =
             setDialog(context, context.getString(R.string.are_you_sure), message, dialogButton)
 

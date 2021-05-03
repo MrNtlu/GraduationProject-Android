@@ -6,24 +6,24 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "userToken")
 
 class UserManager(private val context: Context) {
     private val TOKEN_KEY = stringPreferencesKey("token_key")
-    private val EMAIL_KEY = stringPreferencesKey("email_key")
     private val USERID_KEY = stringPreferencesKey("userid_key")
 
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "userToken")
+    fun getUserInfo() = userTokenFlow.combine(userIDFlow){ token, id->
+        Pair(token, id)
+    }
 
-    val userTokenFlow = context.dataStore.data.map {
+    private val userTokenFlow = context.dataStore.data.map {
         it[TOKEN_KEY]
     }
 
-    val userEmailFlow = context.dataStore.data.map {
-        it[EMAIL_KEY]
-    }
-
-    val userIDFlow = context.dataStore.data.map {
+    private val userIDFlow = context.dataStore.data.map {
         it[USERID_KEY]
     }
 
@@ -34,9 +34,9 @@ class UserManager(private val context: Context) {
         }
     }
 
-    suspend fun saveUserInfo(email: String){
-        context.dataStore.edit { settings ->
-            settings[EMAIL_KEY] = email
+    suspend fun deleteDataStore(){
+        context.dataStore.edit{
+            it.clear()
         }
     }
 }
