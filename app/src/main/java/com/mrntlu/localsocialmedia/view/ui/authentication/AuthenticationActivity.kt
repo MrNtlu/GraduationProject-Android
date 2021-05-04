@@ -17,11 +17,15 @@ class AuthenticationActivity : AppCompatActivity() {
     private val binding get() = _binding!!
     private lateinit var navController: NavController
 
+    private var _userManager: UserManager? = null
+    val userManager get() = _userManager!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityAuthenticationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        _userManager = UserManager(applicationContext)
         navController = (supportFragmentManager.findFragmentById(R.id.auth_nav_host_fragment) as NavHostFragment).navController
     }
 
@@ -32,5 +36,6 @@ class AuthenticationActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+        _userManager = null
     }
 }

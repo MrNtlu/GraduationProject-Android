@@ -1,4 +1,4 @@
-package com.mrntlu.localsocialmedia.service.model.retrofitbody
+package com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.authentication
 
 data class RegisterBody(
         val username: String,

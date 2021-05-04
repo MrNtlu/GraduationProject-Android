@@ -1,13 +1,14 @@
 package com.mrntlu.localsocialmedia.viewmodel
 
 import android.app.Application
-import com.mrntlu.localsocialmedia.service.model.retrofitbody.LoginBody
-import com.mrntlu.localsocialmedia.service.model.retrofitbody.RegisterBody
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.authentication.LoginBody
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.authentication.RegisterBody
 import com.mrntlu.localsocialmedia.service.retrofit.AuthenticationService
 import com.mrntlu.localsocialmedia.service.retrofit.RetrofitClient
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 
 class AuthenticationViewModel(application: Application): BaseViewModel(application) {
+
     private val apiClient = RetrofitClient.getClient().create(AuthenticationService::class.java)
 
     fun loginUser(body: LoginBody, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){

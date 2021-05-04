@@ -16,15 +16,19 @@
     <string name="register">Register</string>
     <string name="forgot_password">Forgot Password</string>
     <string name="name">Name</string>
+    <string name="username">Username</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="password_again">Password Again</string>
-
     <string name="register_privacy"><![CDATA[Privacy & Policy]]></string>
     <string name="register_agree">I agree to</string>
     <string name="register_terms"><![CDATA[Terms & Conditions]]></string>
     <string name="register_profile_image">Profile Image</string>
-    <string name="username">Username</string>
+
+    <!-- Bottom Nav -->
+    <string name="feed">Feed</string>
+    <string name="profile">Profile</string>
+
     <string name="register_please_enter_your_">Please enter your </string>
 
 </resources>

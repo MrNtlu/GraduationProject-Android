@@ -1,35 +1,26 @@
 package com.mrntlu.localsocialmedia.view.ui.authentication
 
-import android.app.Activity
-import android.app.Activity.RESULT_OK
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import com.bumptech.glide.Glide
 import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentRegisterBinding
-import com.mrntlu.localsocialmedia.service.model.retrofitbody.RegisterBody
-import com.mrntlu.localsocialmedia.utils.DialogButtons
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.authentication.RegisterBody
 import com.mrntlu.localsocialmedia.utils.MaterialDialogUtil
 import com.mrntlu.localsocialmedia.utils.isNotEmptyOrBlank
-import com.mrntlu.localsocialmedia.utils.printLog
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.viewmodel.AuthenticationViewModel
 import com.yinglan.keyboard.HideUtil
 import kotlinx.coroutines.launch
 import java.util.*
-
 
 class RegisterFragment : Fragment(), CoroutinesErrorHandler {
 
@@ -38,7 +29,6 @@ class RegisterFragment : Fragment(), CoroutinesErrorHandler {
 
     private lateinit var navController: NavController
     private val authenticationViewModel: AuthenticationViewModel by viewModels()
-    private var profileImage: Uri? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentRegisterBinding.inflate(layoutInflater, container, false)
@@ -53,12 +43,9 @@ class RegisterFragment : Fragment(), CoroutinesErrorHandler {
     }
 
     private fun setListeners(){
-        binding.registerImagePickButton.setOnClickListener {
-            startActivityForResult(openFileChooser(), 1)
-        }
-
         binding.registerLoginButton.setOnClickListener {
-            navController.popBackStack()
+            //navController.popBackStack()
+            navController.navigate(R.id.action_registerFragment_to_loginFragment)
         }
 
         binding.registerRegisterButton.setOnClickListener {view ->
@@ -72,12 +59,13 @@ class RegisterFragment : Fragment(), CoroutinesErrorHandler {
             if (errorMessage == null){
                 (activity as AuthenticationActivity).setLoadingVisibility(true)
                 authenticationViewModel.registerUser(RegisterBody(username, email, name, password),this).observe(viewLifecycleOwner){
+                    clearFocus(view)
                     (activity as AuthenticationActivity).setLoadingVisibility(false)
-                    printLog("$it")
+
                     if (it.status == 200){
                         lifecycleScope.launch {
                             MaterialDialogUtil.showInfoDialog(view.context,"Success","Successfully Registered.")
-                            navController.popBackStack()
+                            navController.navigate(R.id.action_registerFragment_to_loginFragment)
                         }
                     }else
                         onError(it.message)
@@ -87,16 +75,20 @@ class RegisterFragment : Fragment(), CoroutinesErrorHandler {
         }
 
         binding.registerLayout.setOnClickListener {
-            HideUtil.hideSoftKeyboard(it)
-            if (binding.registerNameEditText.hasFocus())
-                binding.registerNameEditText.clearFocus()
-            if (binding.registerMailEditText.hasFocus())
-                binding.registerMailEditText.clearFocus()
-            if (binding.registerPasswordEditText.hasFocus())
-                binding.registerPasswordEditText.clearFocus()
-            if (binding.registerPasswordAgainEditText.hasFocus())
-                binding.registerPasswordAgainEditText.clearFocus()
+            clearFocus(it)
         }
+    }
+
+    private fun clearFocus(view: View){
+        HideUtil.hideSoftKeyboard(view)
+        if (binding.registerNameEditText.hasFocus())
+            binding.registerNameEditText.clearFocus()
+        if (binding.registerMailEditText.hasFocus())
+            binding.registerMailEditText.clearFocus()
+        if (binding.registerPasswordEditText.hasFocus())
+            binding.registerPasswordEditText.clearFocus()
+        if (binding.registerPasswordAgainEditText.hasFocus())
+            binding.registerPasswordAgainEditText.clearFocus()
     }
 
     private fun checkRegisterRules(name: String, username: String, email: String, password: String, passwordAgain: String): String?{
@@ -118,32 +110,6 @@ class RegisterFragment : Fragment(), CoroutinesErrorHandler {
             "Please accept the Terms & Conditions"
         }else
             null
-    }
-
-    private fun openFileChooser(): Intent {
-        val intent = Intent()
-        intent.apply {
-            type = "image/*"
-            action = Intent.ACTION_GET_CONTENT
-        }
-        return intent
-    }
-
-    private fun onActivityResultHandler(requestCode: Int, resultCode: Int, data: Intent?, image: ImageView?): Uri? {
-        return if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.data != null) {
-            if (image != null)
-                Glide.with(image.context).load(data.data).into(image)
-            data.data
-        } else {
-            null
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_CANCELED){
-            profileImage = onActivityResultHandler(requestCode, resultCode, data, binding.registerImagePickButton)
-        }
     }
 
     override fun onError(message: String) {

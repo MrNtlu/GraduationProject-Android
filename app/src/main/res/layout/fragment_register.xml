@@ -7,12 +7,13 @@
     android:background="?attr/contentBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".view.ui.authentication.RegisterFragment">
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/registerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:focusable="true"
-        android:id="@+id/registerLayout">
+        android:focusable="true">
 
         <TextView
             android:id="@+id/registerTitleText"
@@ -27,27 +28,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/registerImagePickCardView"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="?attr/contentBackground"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/registerTitleText">
-
-            <ImageButton
-                android:id="@+id/registerImagePickButton"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/register_profile_image"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_add_image_48_accent" />
-        </androidx.cardview.widget.CardView>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.1935" />
 
 
         <com.google.android.material.textfield.TextInputLayout
@@ -56,7 +42,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:ems="10"
             android:hint="@string/name"
@@ -69,7 +54,7 @@
             app:boxStrokeWidthFocused="1dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/registerImagePickCardView">
+            app:layout_constraintTop_toTopOf="@+id/guideline3">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/registerNameEditText"
@@ -239,8 +224,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                app:switchMinWidth="56dp"
-                android:checked="false" />
+                android:checked="false"
+                app:switchMinWidth="56dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -278,8 +263,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                app:switchMinWidth="56dp"
-                android:checked="false" />
+                android:checked="false"
+                app:switchMinWidth="56dp" />
         </LinearLayout>
 
         <Button
@@ -316,5 +301,6 @@
             app:layout_constraintEnd_toEndOf="@+id/registerRegisterButton"
             app:layout_constraintStart_toStartOf="@+id/registerRegisterButton"
             app:layout_constraintTop_toBottomOf="@+id/registerRegisterButton" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
