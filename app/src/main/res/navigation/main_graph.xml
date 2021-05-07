@@ -14,5 +14,18 @@
         android:id="@+id/profileFragment"
         android:name="com.mrntlu.localsocialmedia.view.ui.main.ProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile" >
+        <action
+            android:id="@+id/action_profileFragment_to_profileFollowFragment"
+            app:destination="@id/profileFollowFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileFollowFragment"
+        android:name="com.mrntlu.localsocialmedia.view.ui.main.ProfileFollowFragment"
+        android:label="fragment_profile_follow"
+        tools:layout="@layout/fragment_profile_follow" />
 </navigation>

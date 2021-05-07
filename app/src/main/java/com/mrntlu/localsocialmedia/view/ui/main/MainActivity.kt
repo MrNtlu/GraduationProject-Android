@@ -30,11 +30,10 @@ class MainActivity : AppCompatActivity(), CoroutinesErrorHandler {
     companion object{
         const val TOKEN_ARG = "token"
         const val ID_ARG = "id"
-
-        lateinit var token: String
-        lateinit var userID: String
-        lateinit var currentUser: UserModel
     }
+    lateinit var token: String
+    lateinit var userID: String
+    lateinit var currentUser: UserModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

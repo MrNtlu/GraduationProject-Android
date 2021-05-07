@@ -25,10 +25,19 @@
     <string name="register_terms"><![CDATA[Terms & Conditions]]></string>
     <string name="register_profile_image">Profile Image</string>
 
+    <!-- Profile -->
+    <string name="profile_image">Profile Image</string>
+    <string name="profile_posts">Posts</string>
+    <string name="profile_followers">Followers</string>
+    <string name="profile_following">Following</string>
+
     <!-- Bottom Nav -->
     <string name="feed">Feed</string>
     <string name="profile">Profile</string>
 
     <string name="register_please_enter_your_">Please enter your </string>
+    <string name="edit">Edit</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

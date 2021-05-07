@@ -4,6 +4,6 @@ import java.util.*
 
 data class UserFollowModel(
         val id: Int,
-        val user: Int,
+        val user: UserModel,
         val date: Date
 )

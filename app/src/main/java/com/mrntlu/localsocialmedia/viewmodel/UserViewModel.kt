@@ -16,4 +16,12 @@ class UserViewModel(application: Application): BaseViewModel(application) {
     fun searchUser(search: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
         apiClient.searchUser(search, token)
     }
+
+    fun getUserFollowings(userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.getUserFollowings(userID, token)
+    }
+
+    fun getUserFollowers(userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.getUserFollowers(userID, token)
+    }
 }
