@@ -32,6 +32,7 @@ class ProfileFragment : Fragment() {
 
     companion object{
         const val USER_ARG = "user"
+        const val USER_ID_ARG = "userID"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,9 +52,9 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         currentUser = (activity as MainActivity).currentUser
-        (activity as MainActivity).setToolbarBackButton(false)
-        navController = Navigation.findNavController(view)
         isCurrentUser = !::userModel.isInitialized
+        (activity as MainActivity).setToolbarBackButton(!isCurrentUser)
+        navController = Navigation.findNavController(view)
 
         setUI(view)
         setListeners()
@@ -63,9 +64,9 @@ class ProfileFragment : Fragment() {
         binding.profileEditButton.shouldVisible(isCurrentUser)
         val userProfile = if (isCurrentUser) currentUser else userModel
         userProfile.apply {
-            if (image != null) {
+            if (imageUri != null) {
                 binding.profileImageProgress.setVisible()
-                Glide.with(view.context).load(image).addListener(object: RequestListener<Drawable>{
+                Glide.with(view.context).load(imageUri).addListener(object: RequestListener<Drawable>{
                     override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
                         if (_binding != null)
                             binding.profileImageProgress.setGone()

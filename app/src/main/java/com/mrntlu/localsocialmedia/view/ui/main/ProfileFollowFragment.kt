@@ -10,7 +10,7 @@ import androidx.navigation.Navigation
 import com.mrntlu.localsocialmedia.databinding.FragmentProfileFollowBinding
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.utils.setToolbarBackButton
-import com.mrntlu.localsocialmedia.view.adapter.ProfileFollowPagerAdapter
+import com.mrntlu.localsocialmedia.view.adapter.viewpager.ProfileFollowPagerAdapter
 import kotlin.properties.Delegates
 
 class ProfileFollowFragment : Fragment() {

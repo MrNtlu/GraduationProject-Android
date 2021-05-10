@@ -1,3 +1,4 @@
+
 package com.mrntlu.localsocialmedia.view.ui.main
 
 import android.os.Bundle
@@ -5,17 +6,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentProfileFollowPagerBinding
-import com.mrntlu.localsocialmedia.utils.MaterialDialogUtil
+import com.mrntlu.localsocialmedia.service.model.UserFollowModel
 import com.mrntlu.localsocialmedia.utils.printLog
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
-import com.mrntlu.localsocialmedia.view.ui.authentication.AuthenticationActivity
+import com.mrntlu.localsocialmedia.view.`interface`.Interaction
+import com.mrntlu.localsocialmedia.view.adapter.FollowAdapter
 import com.mrntlu.localsocialmedia.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import java.util.*
@@ -32,6 +36,7 @@ class ProfileFollowPagerFragment(private val pagerType: PagerType, private val u
 
     private lateinit var navController: NavController
     private lateinit var token: String
+    private var followAdapter: FollowAdapter? = null
     private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -50,7 +55,21 @@ class ProfileFollowPagerFragment(private val pagerType: PagerType, private val u
 
     private fun setRecyclerView() {
         binding.profileFollowRV.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            layoutManager = linearLayoutManager
+            followAdapter = FollowAdapter(object: Interaction<UserFollowModel> {
+                override fun onItemSelected(position: Int, item: UserFollowModel) {
+                    navController.navigate(R.id.action_profileFollowFragment_to_profileFragment,
+                        bundleOf(ProfileFragment.USER_ARG to item.user))
+                }
 
+                override fun onErrorRefreshPressed() {
+                    //TODO("Not yet implemented")
+                    printLog("Error pressed.")
+                }
+
+            })
+            adapter = followAdapter
         }
     }
 
@@ -64,27 +83,29 @@ class ProfileFollowPagerFragment(private val pagerType: PagerType, private val u
             }
         }
         liveData.observe(viewLifecycleOwner){
-            if (it.status == 200){
-                printLog(it.data!!.toTypedArray().contentToString())
+            if (it.status == 200 && it.data != null){
+                printLog("${it.data}")
+                followAdapter?.submitList(it.data)
             }else
                 onError(it.message)
+        }
+    }
+
+    override fun onError(message: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            whenResumed {
+                followAdapter?.submitError(message)
+
+                /*context?.let {
+                    MaterialDialogUtil.showErrorDialog(it, message)
+                }*/
+            }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    override fun onError(message: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            whenResumed {
-                //TODO Recyclerview should be notified
-
-                context?.let {
-                    MaterialDialogUtil.showErrorDialog(it, message)
-                }
-            }
-        }
+        followAdapter = null
     }
 }

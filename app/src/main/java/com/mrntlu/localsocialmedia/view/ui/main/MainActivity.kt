@@ -15,7 +15,6 @@ import com.mrntlu.localsocialmedia.utils.MaterialDialogUtil
 import com.mrntlu.localsocialmedia.utils.setGone
 import com.mrntlu.localsocialmedia.utils.setVisible
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
-import com.mrntlu.localsocialmedia.view.ui.authentication.AuthenticationActivity
 import com.mrntlu.localsocialmedia.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 

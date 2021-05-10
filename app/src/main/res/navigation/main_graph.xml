@@ -27,5 +27,13 @@
         android:id="@+id/profileFollowFragment"
         android:name="com.mrntlu.localsocialmedia.view.ui.main.ProfileFollowFragment"
         android:label="fragment_profile_follow"
-        tools:layout="@layout/fragment_profile_follow" />
+        tools:layout="@layout/fragment_profile_follow" >
+        <action
+            android:id="@+id/action_profileFollowFragment_to_profileFragment"
+            app:destination="@id/profileFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
 </navigation>

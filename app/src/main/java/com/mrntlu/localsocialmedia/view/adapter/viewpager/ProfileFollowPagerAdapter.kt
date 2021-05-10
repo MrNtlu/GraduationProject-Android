@@ -1,4 +1,4 @@
-package com.mrntlu.localsocialmedia.view.adapter
+package com.mrntlu.localsocialmedia.view.adapter.viewpager
 
 import android.content.Context
 import androidx.fragment.app.FragmentManager
