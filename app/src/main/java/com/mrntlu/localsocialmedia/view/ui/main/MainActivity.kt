@@ -3,7 +3,6 @@ package com.mrntlu.localsocialmedia.view.ui.main
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
@@ -78,7 +77,8 @@ class MainActivity : AppCompatActivity(), CoroutinesErrorHandler {
                     binding.loadingLayout.root.setGone()
                 MaterialDialogUtil.showErrorDialog(this@MainActivity, message)
                 //TODO Signout
-                //TODO go back
+                /*val intent = Intent(this@MainActivity, AuthenticationActivity::class.java)
+                startActivity(intent)*/
             }
         }
     }

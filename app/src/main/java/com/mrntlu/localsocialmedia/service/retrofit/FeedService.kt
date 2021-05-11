@@ -1,7 +1,9 @@
 package com.mrntlu.localsocialmedia.service.retrofit
 
+import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.CommentBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.FeedBody
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
 import retrofit2.http.*
 
 interface FeedService {
@@ -11,6 +13,9 @@ interface FeedService {
 
     @GET("feed/{feed_id}")
     suspend fun getFeed(@Path("feed_id") feedID: String, @Query("key") token: String)
+
+    @GET("feed/user/{user_id}")
+    suspend fun getUserFeed(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<FeedModel>
 
     @POST("create/feed")
     suspend fun postFeed(@Body body: FeedBody, @Path("feed_id") feedID: String, @Query("key") token: String)
