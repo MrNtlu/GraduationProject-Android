@@ -38,7 +38,7 @@ class FollowAdapter(override val interaction: Interaction<UserFollowModel>): Bas
             item.apply {
                 user.imageUri?.let {
                     Glide.with(binding.followUserImage.context)
-                        .load(user.imageUri)
+                        .load(it)
                         .placeholder(ResourcesCompat.getDrawable(binding.followUserImage.context.resources,R.drawable.ic_account_126,null))
                         .into(binding.followUserImage)
                 } ?: binding.followUserImage.setImageResource(R.drawable.ic_account_126)

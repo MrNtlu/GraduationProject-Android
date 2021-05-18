@@ -1,6 +1,7 @@
 package com.mrntlu.localsocialmedia.service.retrofit
 
 import com.mrntlu.localsocialmedia.service.model.FeedModel
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.VoteBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.CommentBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.FeedBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
@@ -15,7 +16,7 @@ interface FeedService {
     suspend fun getFeed(@Path("feed_id") feedID: String, @Query("key") token: String)
 
     @GET("feed/user/{user_id}")
-    suspend fun getUserFeed(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<FeedModel>
+    suspend fun getUserFeed(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<List<FeedModel>>
 
     @POST("create/feed")
     suspend fun postFeed(@Body body: FeedBody, @Path("feed_id") feedID: String, @Query("key") token: String)
@@ -33,6 +34,15 @@ interface FeedService {
         @Query("distance") distance: Int,
         @Query("key") token: String
     )
+
+    @POST("feed/{feed_id}/vote")
+    suspend fun voteFeed(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
+
+    @PUT("feed/{feed_id}/vote")
+    suspend fun updateFeedVote(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
+
+    @DELETE("feed/{feed_id}/vote")
+    suspend fun deleteFeedVote(@Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
 
     //Feed by following
 }

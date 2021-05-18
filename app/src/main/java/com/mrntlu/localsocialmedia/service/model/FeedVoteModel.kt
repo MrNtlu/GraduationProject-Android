@@ -9,5 +9,8 @@ data class FeedVoteModel(
     private val vote: String
 ): Parcelable{
 
-    val voteType get() = VoteType.valueOf(vote)
+    val voteType get() = when(vote.toInt()){
+        1->VoteType.UpVote
+        else->VoteType.DownVote
+    }
 }

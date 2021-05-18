@@ -30,7 +30,6 @@ fun MainActivity.setToolbarBackButton(isEnabled: Boolean){
         setDisplayHomeAsUpEnabled(isEnabled)
         setDisplayShowHomeEnabled(isEnabled)
     }
-
 }
 
 fun Date.isYesterday(): Boolean{
