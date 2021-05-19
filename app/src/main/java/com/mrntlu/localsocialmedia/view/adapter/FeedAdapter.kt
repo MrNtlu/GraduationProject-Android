@@ -24,7 +24,6 @@ import com.mrntlu.localsocialmedia.view.adapter.viewholder.EmptyItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.ErrorItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.LoadingItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.BaseAdapter.HolderType.*
-import com.mrntlu.localsocialmedia.view.ui.main.MainActivity
 
 class FeedAdapter(private val currentUser: UserModel, override val interaction: Interaction<FeedModel>): BaseAdapter<FeedModel>() {
 
@@ -67,7 +66,7 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
                 } ?: binding.feedAuthorImage.setImageResource(R.drawable.ic_account_126)
 
                 binding.feedAuthorNameText.text = author.name
-                binding.feedAuthorUsernameText.text = "@${author.username}"
+                binding.feedAuthorUsernameText.text = author.username
                 binding.feedBodyText.text = message
                 binding.feedPostDateText.text = postedDate
                 binding.feedVoteText.text = (upvoteCount - downvoteCount).toString()

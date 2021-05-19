@@ -34,6 +34,8 @@
 
     <!-- Bottom Nav -->
     <string name="feed">Feed</string>
+    <string name="search">Search</string>
+    <string name="home">Home</string>
     <string name="profile">Profile</string>
 
     <!-- Cell Texts -->
@@ -42,4 +44,7 @@
 
     <!-- General -->
     <string name="edit">Edit</string>
+    <string name="more">More</string>
+    <string name="upvote">Upvote</string>
+    <string name="downvote">Downvote</string>
 </resources>

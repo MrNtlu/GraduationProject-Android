@@ -24,18 +24,13 @@ import com.mrntlu.localsocialmedia.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 
-class ProfileFollowPagerFragment(private val pagerType: PagerType, private val userID: Int): Fragment(),
-    CoroutinesErrorHandler {
+class ProfileFollowPagerFragment(private val pagerType: PagerType, private val userID: Int):
+    BaseFragment<FragmentProfileFollowPagerBinding>(), CoroutinesErrorHandler {
     enum class PagerType{
         FOLLOWER,
         FOLLOWING
     }
 
-    private var _binding: FragmentProfileFollowPagerBinding? = null
-    private val binding get() = _binding!!
-
-    private lateinit var navController: NavController
-    private lateinit var token: String
     private var followAdapter: FollowAdapter? = null
     private val userViewModel: UserViewModel by viewModels()
 
@@ -46,8 +41,6 @@ class ProfileFollowPagerFragment(private val pagerType: PagerType, private val u
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navController = Navigation.findNavController(view)
-        token = (activity as MainActivity).token
 
         setRecyclerView()
         setObservers()
@@ -105,7 +98,6 @@ class ProfileFollowPagerFragment(private val pagerType: PagerType, private val u
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         followAdapter = null
     }
 }

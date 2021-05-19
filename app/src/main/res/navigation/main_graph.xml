@@ -3,13 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_graph"
-    app:startDestination="@id/feedFragment">
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.mrntlu.localsocialmedia.view.ui.main.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/feedFragment"
         android:name="com.mrntlu.localsocialmedia.view.ui.main.FeedFragment"
         android:label="fragment_feed"
         tools:layout="@layout/fragment_feed" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.mrntlu.localsocialmedia.view.ui.main.SearchFragment"
+        android:label="fragment_search"
+        tools:layout="@layout/fragment_search" />
+
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.mrntlu.localsocialmedia.view.ui.main.ProfileFragment"

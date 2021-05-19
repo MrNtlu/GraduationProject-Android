@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -127,7 +128,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_up_arrow_48" />
+            app:srcCompat="@drawable/ic_up_arrow_48"
+            android:contentDescription="@string/upvote" />
 
         <TextView
             android:id="@+id/feedVoteText"
@@ -154,7 +156,8 @@
             app:layout_constraintStart_toEndOf="@+id/feedVoteText"
             app:layout_constraintTop_toTopOf="@+id/feedUpVoteButton"
             app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@drawable/ic_down_arrow_48" />
+            app:srcCompat="@drawable/ic_down_arrow_48"
+            android:contentDescription="@string/downvote" />
 
         <ImageButton
             android:id="@+id/feedMoreButton"
@@ -168,6 +171,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_48" />
+            app:srcCompat="@drawable/ic_more_48"
+            android:contentDescription="@string/more" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

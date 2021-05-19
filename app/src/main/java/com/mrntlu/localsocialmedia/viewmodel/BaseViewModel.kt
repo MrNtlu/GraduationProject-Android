@@ -36,4 +36,13 @@ open class BaseViewModel(application: Application): AndroidViewModel(application
 
         return liveData
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        mJob?.let {
+            if (it.isActive) {
+                it.cancel()
+            }
+        }
+    }
 }

@@ -2,17 +2,12 @@ package com.mrntlu.localsocialmedia.view.ui.main
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -30,15 +25,9 @@ import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
 import kotlinx.coroutines.launch
 
-class ProfileFragment : Fragment(), CoroutinesErrorHandler {
+class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorHandler{
 
-    private var _binding: FragmentProfileBinding? = null
-    private val binding get() = _binding!!
-
-    private lateinit var navController: NavController
-    private lateinit var currentUser: UserModel
     private lateinit var userModel: UserModel
-    private lateinit var token: String
     private val viewModel: FeedViewModel by viewModels()
     private var feedAdapter: FeedAdapter? = null
     private var isCurrentUser = false
@@ -48,7 +37,6 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
             currentUser
         else
             userModel
-
 
     companion object{
         const val USER_ARG = "user"
@@ -71,11 +59,8 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        currentUser = (activity as MainActivity).currentUser
-        token = (activity as MainActivity).token
         isCurrentUser = !::userModel.isInitialized
         (activity as MainActivity).setToolbarBackButton(!isCurrentUser)
-        navController = Navigation.findNavController(view)
 
         setUI(view)
         setRecyclerView()
@@ -84,7 +69,8 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
     }
 
     private fun setUI(view: View){
-        binding.profileEditButton.shouldVisible(isCurrentUser)
+        setHasOptionsMenu(isCurrentUser)
+
         displayUser.apply {
             if (imageUri != null) {
                 binding.profileImageProgress.setVisible()
@@ -132,10 +118,6 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
     }
 
     private fun setListeners(){
-        binding.profileEditButton.setOnClickListener {
-            printLog("Edit")
-        }
-
         binding.profileFollowerLayout.setOnClickListener {
             navController.navigate(R.id.action_profileFragment_to_profileFollowFragment, bundleOf(
                 ProfileFollowFragment.USERID_ARG to (displayUser.id)
@@ -147,11 +129,16 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
                 ProfileFollowFragment.USERID_ARG to (displayUser.id)
             ))
         }
+
+        binding.profileSwipeRefresh.setOnRefreshListener {
+            feedAdapter?.submitLoading()
+            setObservers()
+            binding.profileSwipeRefresh.isRefreshing = false
+        }
     }
 
     private fun setObservers(){
         viewModel.getUserFeed(displayUser.id.toString(), token, this).observe(viewLifecycleOwner){
-            printLog("Result is ${it.message} ${it.status} ${it.data}")
             if (it.status == 200 && it.data != null){
                 feedAdapter?.submitList(it.data)
             }else
@@ -159,11 +146,26 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.profile_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.edit_profile -> {
+                printLog("Edit pressed")
+                true
+                //navController.navigate(R.id., bundleOf("user" to currentUser))
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onError(message: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             whenResumed {
                 feedAdapter?.submitError(message)
-
                 /*context?.let {
                     MaterialDialogUtil.showErrorDialog(it, message)
                 }*/
@@ -173,7 +175,6 @@ class ProfileFragment : Fragment(), CoroutinesErrorHandler {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
         feedAdapter = null
     }
 }

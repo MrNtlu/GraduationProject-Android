@@ -39,7 +39,8 @@ class MainActivity : AppCompatActivity(), CoroutinesErrorHandler {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        navController = (supportFragmentManager.findFragmentById(R.id.main_nav_host_fragment) as NavHostFragment).navController
+        val navHost = (supportFragmentManager.findFragmentById(R.id.main_nav_host_fragment) as NavHostFragment)
+        navController = navHost.navController
 
         val i = intent
         val extras = i.extras
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity(), CoroutinesErrorHandler {
             if (it.status == 200 && it.data != null){
                 currentUser = it.data
                 NavigationUI.setupWithNavController(binding.mainBottomNav, navController)
+                navController.setGraph(R.navigation.main_graph)
             }else
                 onError(it.message)
         }

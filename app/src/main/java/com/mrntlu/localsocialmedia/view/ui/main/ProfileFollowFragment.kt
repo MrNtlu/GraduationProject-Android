@@ -13,13 +13,8 @@ import com.mrntlu.localsocialmedia.utils.setToolbarBackButton
 import com.mrntlu.localsocialmedia.view.adapter.viewpager.ProfileFollowPagerAdapter
 import kotlin.properties.Delegates
 
-class ProfileFollowFragment : Fragment() {
+class ProfileFollowFragment : BaseFragment<FragmentProfileFollowBinding>() {
 
-    private var _binding: FragmentProfileFollowBinding? = null
-    private val binding get() = _binding!!
-
-    private lateinit var navController: NavController
-    private lateinit var currentUser: UserModel
     private var userID by Delegates.notNull<Int>()
 
     companion object{
@@ -40,9 +35,7 @@ class ProfileFollowFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        currentUser = (activity as MainActivity).currentUser
         (activity as MainActivity).setToolbarBackButton(true)
-        navController = Navigation.findNavController(view)
 
         setupViewPager(view)
     }
@@ -51,10 +44,5 @@ class ProfileFollowFragment : Fragment() {
         val pagerAdapter = ProfileFollowPagerAdapter(view.context, childFragmentManager, userID)
         binding.profileViewPager.adapter = pagerAdapter
         binding.profileTabLayout.setupWithViewPager(binding.profileViewPager)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }
