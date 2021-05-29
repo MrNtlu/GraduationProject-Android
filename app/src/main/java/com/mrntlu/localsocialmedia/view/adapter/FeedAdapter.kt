@@ -71,18 +71,13 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
                 binding.feedPostDateText.text = postedDate
                 binding.feedVoteText.text = (upvoteCount - downvoteCount).toString()
 
-                //TODO Change it on server side and get if user voted or not and return it
-                val currentUserVote = votes.filter {
-                    it.user.id == currentUser.id
-                }
-                if(currentUserVote.isNotEmpty()){
-                    val tintColor = ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.colorPrimary))
-                    when(currentUserVote[0].voteType){
+                if (userVote.isVoted){
+                    when(userVote.voteType){
                         VoteType.UpVote->{
-                            binding.feedUpVoteButton.imageTintList = tintColor
+                            binding.feedUpVoteButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.greenMaterial400))
                         }
                         VoteType.DownVote->{
-                            binding.feedUpVoteButton.imageTintList = tintColor
+                            binding.feedDownVoteButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.redMaterial400))
                         }
                     }
                 }

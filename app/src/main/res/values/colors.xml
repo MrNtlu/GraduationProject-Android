@@ -10,4 +10,6 @@
     <color name="hintGrey">#9E9E9E</color>
     <color name="white">#FFFFFF</color>
     <color name="darkWhite">#F9F9F9</color>
+    <color name="redMaterial400">#EF5350</color>
+    <color name="greenMaterial400">#7FBB66</color>
 </resources>

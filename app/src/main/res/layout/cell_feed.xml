@@ -123,13 +123,13 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/upvote"
             android:scaleType="fitCenter"
-            android:tint="@color/colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_up_arrow_48"
-            android:contentDescription="@string/upvote" />
+            app:tint="?attr/contentTextColor" />
 
         <TextView
             android:id="@+id/feedVoteText"
@@ -150,14 +150,14 @@
             android:layout_height="24dp"
             android:layout_marginStart="4dp"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/downvote"
             android:scaleType="fitCenter"
-            android:tint="@color/colorAccent"
             app:layout_constraintBottom_toBottomOf="@+id/feedUpVoteButton"
             app:layout_constraintStart_toEndOf="@+id/feedVoteText"
             app:layout_constraintTop_toTopOf="@+id/feedUpVoteButton"
             app:layout_constraintVertical_bias="0.0"
             app:srcCompat="@drawable/ic_down_arrow_48"
-            android:contentDescription="@string/downvote" />
+            app:tint="?attr/contentTextColor" />
 
         <ImageButton
             android:id="@+id/feedMoreButton"
@@ -167,7 +167,7 @@
             android:layout_marginBottom="8dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:tint="?attr/contentTextColor"
+            app:tint="?attr/contentTextColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

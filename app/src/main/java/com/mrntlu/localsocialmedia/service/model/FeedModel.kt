@@ -22,8 +22,22 @@ data class FeedModel(
     var upvoteCount: Int,
     @SerializedName("downvote_count")
     var downvoteCount: Int,
-): Parcelable{
+    @SerializedName("user_vote")
+    val userVote: UserVoteModel
+): Parcelable {
 
     val feedType get() = FeedType.valueOf(type)
+}
 
+@Parcelize
+data class UserVoteModel(
+    @SerializedName("is_voted")
+    val isVoted: Boolean,
+    @SerializedName("vote_type")
+    val _voteType: String?
+): Parcelable {
+    val voteType get() = when(_voteType?.toInt()){
+        1->VoteType.UpVote
+        else->VoteType.DownVote
+    }
 }
