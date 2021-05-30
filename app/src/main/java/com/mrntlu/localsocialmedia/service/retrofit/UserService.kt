@@ -3,10 +3,8 @@ package com.mrntlu.localsocialmedia.service.retrofit
 import com.mrntlu.localsocialmedia.service.model.UserFollowModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
+import okhttp3.MultipartBody
+import retrofit2.http.*
 
 interface UserService {
 
@@ -22,8 +20,14 @@ interface UserService {
     @GET("user/{user_id}/followings")
     suspend fun getUserFollowings(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<List<UserFollowModel>>
 
-    //@POST("user/{user_id}/follow")
+    @PUT("user/{user_id}/edit")
+    suspend fun updateUserInfo(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<Unit>
 
-    //Upload Image
-    //Update Profile
+    @Multipart
+    @PUT("user/{user_id}/upload")
+    suspend fun uploadUserImage(
+        @Path("user_id") userID: String,
+        @Query("key") token: String,
+        @Part part: MultipartBody.Part
+    ): BaseResponse<Unit>
 }

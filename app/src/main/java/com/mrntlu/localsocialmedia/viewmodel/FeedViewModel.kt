@@ -7,6 +7,8 @@ import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed
 import com.mrntlu.localsocialmedia.service.retrofit.FeedService
 import com.mrntlu.localsocialmedia.service.retrofit.RetrofitClient
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 class FeedViewModel(application: Application): BaseViewModel(application) {
 
@@ -42,5 +44,13 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
 
     fun deleteFeedVote(feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
         apiClient.deleteFeedVote(feedID, token)
+    }
+
+    fun getFeedByFollowings(token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.getFeedByFollowings(token)
+    }
+
+    fun reportFeed(feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.reportFeed(feedID, token)
     }
 }

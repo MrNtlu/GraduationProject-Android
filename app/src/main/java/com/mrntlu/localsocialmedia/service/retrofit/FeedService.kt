@@ -9,23 +9,12 @@ import retrofit2.http.*
 
 interface FeedService {
 
-    @GET("feedlist")
-    suspend fun getAllFeeds()
-
     @GET("feed/{feed_id}")
     suspend fun getFeed(@Path("feed_id") feedID: String, @Query("key") token: String)
 
+//GET FEED
     @GET("feed/user/{user_id}")
     suspend fun getUserFeed(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<List<FeedModel>>
-
-    @POST("create/feed")
-    suspend fun postFeed(@Body body: FeedBody, @Path("feed_id") feedID: String, @Query("key") token: String)
-
-    @GET("feed/{feed_id}/comments")
-    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("key") token: String)
-
-    @POST("feed/{feed_id}/create")
-    suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String)
 
     @GET("feed/location")
     suspend fun getFeedsByLocation(
@@ -35,6 +24,20 @@ interface FeedService {
         @Query("key") token: String
     )
 
+    @GET("feed/follow")
+    suspend fun getFeedByFollowings(@Query("key") token: String): BaseResponse<List<FeedModel>>
+
+    @POST("create/feed")
+    suspend fun postFeed(@Body body: FeedBody, @Path("feed_id") feedID: String, @Query("key") token: String)
+
+//GET COMMENTS
+    @GET("feed/{feed_id}/comments")
+    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("key") token: String)
+
+    @POST("feed/{feed_id}/create")
+    suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String)
+
+//HANDLE VOTE REPORT
     @POST("feed/{feed_id}/vote")
     suspend fun voteFeed(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
 
@@ -44,5 +47,12 @@ interface FeedService {
     @DELETE("feed/{feed_id}/vote")
     suspend fun deleteFeedVote(@Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
 
-    //Feed by following
+    @POST("feed/{feed_id}/report")
+    suspend fun reportFeed(@Path("feed_id") feedID: String, @Query("key") token: String):  BaseResponse<Unit>
+
+    //TODO Search in all feeds?
+    /*
+    @GET("feedlist")
+    suspend fun getAllFeeds()
+     */
 }

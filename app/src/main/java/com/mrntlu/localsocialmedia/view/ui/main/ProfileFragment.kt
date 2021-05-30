@@ -1,8 +1,19 @@
 package com.mrntlu.localsocialmedia.view.ui.main
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.os.Environment
 import android.view.*
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
@@ -23,12 +34,17 @@ import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
+import com.mrntlu.localsocialmedia.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorHandler{
 
     private lateinit var userModel: UserModel
     private val viewModel: FeedViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
     private var feedAdapter: FeedAdapter? = null
     private var isCurrentUser = false
 
@@ -37,6 +53,19 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
             currentUser
         else
             userModel
+
+    private val imagePickerActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
+        onActivityResult(result)
+    }
+
+    private val permissionActivityResult = registerForActivityResult(ActivityResultContracts.RequestPermission()){ permission ->
+        if (permission){
+            openImageChooser()
+        }else
+            context?.let {
+                MaterialDialogUtil.showErrorDialog(it, "Permission denied!")
+            }
+    }
 
     companion object{
         const val USER_ARG = "user"
@@ -146,6 +175,74 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
         }
     }
 
+    private fun onActivityResult(result: ActivityResult) {
+        if (result.resultCode != Activity.RESULT_CANCELED){
+            context?.let {
+                if (result.data != null && result.data!!.data != null){
+                    val imageResult = result.data!!.data!!
+                    Glide.with(it).load(imageResult).into(binding.profileImageView)
+
+                    val image = FileUtils.getFile(it, imageResult)
+                    val requestFile = RequestBody.create(
+                        MediaType.parse(it.contentResolver.getType(imageResult) ?: "image/jpeg"),
+                        image
+                    )
+                    val body = MultipartBody.Part.createFormData("image", image.name, requestFile)
+
+                    userViewModel.uploadUserImage(displayUser.id.toString(), token, body,this).observe(viewLifecycleOwner){ response ->
+                        if (response.status == 200){
+                            //TODO onsuccess
+                        }else{
+                            //TODO ERROR
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    private fun requestPermission() {
+        if (SDK_INT >= Build.VERSION_CODES.R)
+            permissionActivityResult.launch(Manifest.permission.READ_EXTERNAL_STORAGE,)
+        else{
+            activity?.let {
+                ActivityCompat.requestPermissions(
+                    it,
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                    ),
+                    1001
+                )
+            }
+        }
+    }
+
+    private fun checkPermission(): Boolean {
+        return if (SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            context?.let {
+                val result = ContextCompat.checkSelfPermission(it, Manifest.permission.READ_EXTERNAL_STORAGE)
+                result == PackageManager.PERMISSION_GRANTED
+            } ?: true
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == 1001){
+            if (grantResults.isNotEmpty()) {
+                val isReadPermission = grantResults [0] == PackageManager.PERMISSION_GRANTED
+                if (isReadPermission)
+                    openImageChooser()
+                else
+                    context?.let {
+                        MaterialDialogUtil.showErrorDialog(it, "Allow permission for storage access!")
+                    }
+            }
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.profile_menu, menu)
         super.onCreateOptionsMenu(menu, inflater)
@@ -154,12 +251,23 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             R.id.edit_profile -> {
-                printLog("Edit pressed")
+                if (checkPermission())
+                    openImageChooser()
+                else
+                    requestPermission()
                 true
-                //navController.navigate(R.id., bundleOf("user" to currentUser))
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun openImageChooser(){
+        val intent = Intent()
+        intent.apply {
+            type = "image/*"
+            action = Intent.ACTION_GET_CONTENT
+        }
+        imagePickerActivityResult.launch(intent)
     }
 
     override fun onError(message: String) {
