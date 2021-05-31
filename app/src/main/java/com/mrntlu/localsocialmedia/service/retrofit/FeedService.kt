@@ -40,13 +40,13 @@ interface FeedService {
 
 //HANDLE VOTE REPORT
     @POST("feed/{feed_id}/vote")
-    suspend fun voteFeed(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
+    suspend fun voteFeed(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<FeedModel>
 
     @PUT("feed/{feed_id}/vote")
-    suspend fun updateFeedVote(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
+    suspend fun updateFeedVote(@Body body: VoteBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<FeedModel>
 
     @DELETE("feed/{feed_id}/vote")
-    suspend fun deleteFeedVote(@Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
+    suspend fun deleteFeedVote(@Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<FeedModel>
 
     @POST("feed/{feed_id}/report")
     suspend fun reportFeed(@Path("feed_id") feedID: String, @Query("key") token: String):  BaseResponse<Unit>

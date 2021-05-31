@@ -26,11 +26,15 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import com.mrntlu.localsocialmedia.databinding.FragmentHomeBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
+import com.mrntlu.localsocialmedia.service.model.UserVoteModel
+import com.mrntlu.localsocialmedia.service.model.VoteType
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.VoteBody
 import com.mrntlu.localsocialmedia.utils.Constants
 import com.mrntlu.localsocialmedia.utils.printLog
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
+import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.ln
@@ -95,10 +99,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                 isRotateGesturesEnabled = false
                 isTiltGesturesEnabled = false
             }
-
-            mMap!!.setOnCameraMoveListener {
-
-            }
         }
     }
 
@@ -142,9 +142,40 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         binding.homeRV.apply{
             val linearLayoutManager = LinearLayoutManager(context)
             layoutManager = linearLayoutManager
-            feedAdapter = FeedAdapter(currentUser, object: Interaction<FeedModel> {
+            feedAdapter = FeedAdapter(currentUser, object: FeedInteraction {
                 override fun onItemSelected(position: Int, item: FeedModel) {
                     printLog("Feed item clicked $item")
+                }
+
+                override fun onReportPressed(position: Int, feedModel: FeedModel) {
+                    viewModel.reportFeed(feedModel.id.toString(), token, this@HomeFragment).observe(viewLifecycleOwner){ response ->
+                        if (response.status == 200){
+
+                        }else{
+
+                        }
+                    }
+                }
+
+                override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
+                    val observer = if (feedModel.userVote.isVoted){
+                        if (voteType == feedModel.userVote.voteType){
+                            viewModel.deleteFeedVote(feedModel.id.toString(), token, this@HomeFragment)
+                        }else{
+                            viewModel.updateFeedVote(VoteBody(voteType.num), feedModel.id.toString(), token, this@HomeFragment)
+                        }
+                    }else{
+                        viewModel.voteFeed(VoteBody(voteType.num), feedModel.id.toString(), token, this@HomeFragment)
+                    }
+
+                    observer.observe(viewLifecycleOwner){ response ->
+                        printLog("$response")
+                        if (response.status == 200 && response.data != null){
+                            feedAdapter?.updateItem(position, response.data)
+                        }else{
+
+                        }
+                    }
                 }
 
                 override fun onErrorRefreshPressed() {

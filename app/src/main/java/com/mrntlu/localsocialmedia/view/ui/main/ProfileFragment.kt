@@ -31,10 +31,12 @@ import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentProfileBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
+import com.mrntlu.localsocialmedia.service.model.VoteType
 import com.mrntlu.localsocialmedia.utils.*
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
+import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
 import com.mrntlu.localsocialmedia.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -138,9 +140,17 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
         binding.profileFeedRV.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             layoutManager = linearLayoutManager
-            feedAdapter = FeedAdapter(currentUser, object: Interaction<FeedModel>{
+            feedAdapter = FeedAdapter(currentUser, object: FeedInteraction{
                 override fun onItemSelected(position: Int, item: FeedModel) {
                     printLog("Feed item clicked $item")
+                }
+
+                override fun onReportPressed(position: Int, feedModel: FeedModel) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
+                    TODO("Not yet implemented")
                 }
 
                 override fun onErrorRefreshPressed() {

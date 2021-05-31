@@ -16,13 +16,6 @@ abstract class BaseAdapter<T>(open val interaction: Interaction<T>? = null) :
         EMPTY(3),
         PAGINATION(4)
     }
-    /*
-    protected val LOADING_ITEM_HOLDER = 0
-    val ITEM_HOLDER = 1
-    protected val ERROR_HOLDER = 2
-    protected val NO_ITEM_HOLDER = 3
-    protected val PAGINATION_LOADING_HOLDER = 4
-     */
 
     //Conditions
     private var isAdapterSet = false
@@ -122,6 +115,11 @@ abstract class BaseAdapter<T>(open val interaction: Interaction<T>? = null) :
                     submitPaginationError()
             }
         }
+    }
+
+    fun updateItem(position: Int, item: T){
+        arrayList[position] = item
+        notifyItemChanged(position)
     }
 
     abstract class ItemHolder<T> constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {

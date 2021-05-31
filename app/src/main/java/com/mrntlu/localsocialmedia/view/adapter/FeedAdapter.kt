@@ -18,6 +18,8 @@ import com.mrntlu.localsocialmedia.databinding.CellFeedBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
+import com.mrntlu.localsocialmedia.utils.isDarkThemeOn
+import com.mrntlu.localsocialmedia.utils.printLog
 import com.mrntlu.localsocialmedia.utils.setGone
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.EmptyItemViewHolder
@@ -26,7 +28,7 @@ import com.mrntlu.localsocialmedia.view.adapter.viewholder.LoadingItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.BaseAdapter.HolderType.*
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.PaginationItemViewHolder
 
-class FeedAdapter(private val currentUser: UserModel, override val interaction: Interaction<FeedModel>): BaseAdapter<FeedModel>() {
+class FeedAdapter(private val currentUser: UserModel, override val interaction: FeedInteraction): BaseAdapter<FeedModel>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when(viewType) {
@@ -38,12 +40,22 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
         }
     }
 
-    class FeedHolder(itemView: View, private val currentUser: UserModel, private val interaction: Interaction<FeedModel>?): ItemHolder<FeedModel>(itemView){
+    class FeedHolder(itemView: View, private val currentUser: UserModel, private val interaction: FeedInteraction?): ItemHolder<FeedModel>(itemView){
         val binding = CellFeedBinding.bind(itemView)
 
         override fun bind(item: FeedModel) {
             itemView.setOnClickListener {
                 interaction?.onItemSelected(adapterPosition, item)
+            }
+
+            binding.feedUpVoteButton.setOnClickListener {
+                printLog("UpvotePressed")
+                interaction?.onVotePressed(VoteType.UpVote, adapterPosition, item)
+            }
+
+            binding.feedDownVoteButton.setOnClickListener {
+                printLog("DownvotePressed")
+                interaction?.onVotePressed(VoteType.DownVote, adapterPosition, item)
             }
 
             item.apply {
@@ -72,17 +84,26 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
                 binding.feedPostDateText.text = postedDate
                 binding.feedVoteText.text = (upvoteCount - downvoteCount).toString()
 
+                var upVote = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.white)
+                var downVote = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.white)
                 if (userVote.isVoted){
                     when(userVote.voteType){
                         VoteType.UpVote->{
-                            binding.feedUpVoteButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.greenMaterial400))
+                            upVote = ContextCompat.getColor(itemView.context, R.color.greenMaterial400)
                         }
                         VoteType.DownVote->{
-                            binding.feedDownVoteButton.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(itemView.context, R.color.redMaterial400))
+                            downVote = ContextCompat.getColor(itemView.context, R.color.redMaterial400)
                         }
                     }
                 }
+                binding.feedUpVoteButton.imageTintList = ColorStateList.valueOf(upVote)
+                binding.feedDownVoteButton.imageTintList = ColorStateList.valueOf(downVote)
             }
         }
     }
+}
+
+interface FeedInteraction: Interaction<FeedModel>{
+    fun onReportPressed(position: Int, feedModel: FeedModel)
+    fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel)
 }

@@ -1,5 +1,8 @@
 package com.mrntlu.localsocialmedia.utils
 
+import android.content.Context
+import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.util.Log
 import android.view.View
 import com.mrntlu.localsocialmedia.view.ui.main.MainActivity
@@ -30,6 +33,10 @@ fun MainActivity.setToolbarBackButton(isEnabled: Boolean){
         setDisplayHomeAsUpEnabled(isEnabled)
         setDisplayShowHomeEnabled(isEnabled)
     }
+}
+
+fun Context.isDarkThemeOn(): Boolean {
+    return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
 }
 
 fun Date.isYesterday(): Boolean{

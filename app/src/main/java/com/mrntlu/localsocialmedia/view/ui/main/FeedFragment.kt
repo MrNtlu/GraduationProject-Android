@@ -12,12 +12,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mrntlu.localsocialmedia.databinding.FragmentFeedBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
+import com.mrntlu.localsocialmedia.service.model.VoteType
 import com.mrntlu.localsocialmedia.utils.Constants
 import com.mrntlu.localsocialmedia.utils.printLog
 import com.mrntlu.localsocialmedia.utils.setToolbarBackButton
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
-import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
+import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
 import kotlinx.coroutines.launch
 
@@ -47,9 +48,17 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
         binding.feedRV.apply{
             val linearLayoutManager = LinearLayoutManager(context)
             layoutManager = linearLayoutManager
-            feedAdapter = FeedAdapter(currentUser, object: Interaction<FeedModel> {
+            feedAdapter = FeedAdapter(currentUser, object: FeedInteraction {
                 override fun onItemSelected(position: Int, item: FeedModel) {
                     printLog("Feed item clicked $item")
+                }
+
+                override fun onReportPressed(position: Int, feedModel: FeedModel) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
+                    TODO("Not yet implemented")
                 }
 
                 override fun onErrorRefreshPressed() {
