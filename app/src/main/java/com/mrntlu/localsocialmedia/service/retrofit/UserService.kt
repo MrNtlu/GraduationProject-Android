@@ -12,13 +12,13 @@ interface UserService {
     suspend fun getUserInfo(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<UserModel>
 
     @GET("user")
-    suspend fun searchUser(@Query("search") search: String, @Query("key") token: String): BaseResponse<UserModel>
+    suspend fun searchUser(@Query("search") search: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<UserModel>
 
     @GET("user/{user_id}/followers")
-    suspend fun getUserFollowers(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<List<UserFollowModel>>
+    suspend fun getUserFollowers(@Path("user_id") userID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<UserFollowModel>>
 
     @GET("user/{user_id}/followings")
-    suspend fun getUserFollowings(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<List<UserFollowModel>>
+    suspend fun getUserFollowings(@Path("user_id") userID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<UserFollowModel>>
 
     @PUT("user/{user_id}/edit")
     suspend fun updateUserInfo(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<Unit>

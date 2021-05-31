@@ -17,5 +17,10 @@ class Constants {
         const val THEME_PREF_NAME = "appTheme"
         const val DARK_THEME = 0
         const val LIGHT_THEME = 1
+
+        const val FEED_PAGINATION_LIMIT = 15
+        const val COMMENT_PAGINATION_LIMIT = 20
+        const val FOLLOW_PAGINATION_LIMIT = 15
+        const val SEARCH_PAGINATION_LIMIT = 25
     }
 }

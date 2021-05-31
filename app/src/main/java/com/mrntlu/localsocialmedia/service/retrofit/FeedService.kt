@@ -14,25 +14,26 @@ interface FeedService {
 
 //GET FEED
     @GET("feed/user/{user_id}")
-    suspend fun getUserFeed(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<List<FeedModel>>
+    suspend fun getUserFeed(@Path("user_id") userID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<FeedModel>>
 
     @GET("feed/location")
     suspend fun getFeedsByLocation(
         @Query("lat") latitude: Float,
         @Query("long") longitude: Float,
         @Query("distance") distance: Int,
+        @Query("page") page: Int,
         @Query("key") token: String
-    )
+    ): BaseResponse<ArrayList<FeedModel>>
 
     @GET("feed/follow")
-    suspend fun getFeedByFollowings(@Query("key") token: String): BaseResponse<List<FeedModel>>
+    suspend fun getFeedByFollowings(@Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<FeedModel>>
 
     @POST("create/feed")
     suspend fun postFeed(@Body body: FeedBody, @Path("feed_id") feedID: String, @Query("key") token: String)
 
 //GET COMMENTS
     @GET("feed/{feed_id}/comments")
-    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("key") token: String)
+    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("page") page: Int, @Query("key") token: String)
 
     @POST("feed/{feed_id}/create")
     suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String)

@@ -37,6 +37,26 @@ open class BaseViewModel(application: Application): AndroidViewModel(application
         return liveData
     }
 
+    protected fun <T> basePaginationRequest(liveData: MutableLiveData<T> ,errorHandler: CoroutinesErrorHandler, request:suspend () -> T){
+        mJob = viewModelScope.launch(Dispatchers.IO + CoroutineExceptionHandler { _, error ->
+            errorHandler.onError(error.localizedMessage ?: "Error occured! Please try again.")
+        }){
+            var response: T? = null
+            val job = withTimeoutOrNull(Constants.TIME_OUT){
+                response = request()
+            }
+            withContext(Dispatchers.Main){
+                if (job == null){
+                    errorHandler.onError("Timeout! Please try again.")
+                }else{
+                    response?.let {
+                        liveData.value = it
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         mJob?.let {

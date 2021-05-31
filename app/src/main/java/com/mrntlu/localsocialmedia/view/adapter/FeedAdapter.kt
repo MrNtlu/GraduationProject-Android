@@ -24,6 +24,7 @@ import com.mrntlu.localsocialmedia.view.adapter.viewholder.EmptyItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.ErrorItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.LoadingItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.BaseAdapter.HolderType.*
+import com.mrntlu.localsocialmedia.view.adapter.viewholder.PaginationItemViewHolder
 
 class FeedAdapter(private val currentUser: UserModel, override val interaction: Interaction<FeedModel>): BaseAdapter<FeedModel>() {
 
@@ -32,7 +33,7 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
             EMPTY.num -> EmptyItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_empty, parent, false))
             LOADING.num -> LoadingItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.loading_layout, parent, false))
             ERROR.num -> ErrorItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_error, parent, false))
-            PAGINATION.num -> EmptyItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_pagination, parent, false))
+            PAGINATION.num -> PaginationItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_pagination, parent, false))
             else -> FeedHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_feed, parent, false), currentUser, interaction)
         }
     }

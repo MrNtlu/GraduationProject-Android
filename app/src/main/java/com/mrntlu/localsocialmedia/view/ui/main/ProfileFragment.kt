@@ -10,6 +10,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Environment
 import android.view.*
+import android.widget.AbsListView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -20,6 +21,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -47,6 +49,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
     private val userViewModel: UserViewModel by viewModels()
     private var feedAdapter: FeedAdapter? = null
     private var isCurrentUser = false
+
+    private var isLoading = false
+    private var pageNum = 1
 
     private val displayUser get() =
         if (isCurrentUser)
@@ -95,6 +100,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
         setRecyclerView()
         setListeners()
         setObservers()
+        setData()
     }
 
     private fun setUI(view: View){
@@ -138,11 +144,35 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
                 }
 
                 override fun onErrorRefreshPressed() {
-                    //TODO("Not yet implemented")
-                    printLog("Error pressed on Feed")
+                    feedAdapter?.submitLoading()
+                    setData()
                 }
             })
             adapter = feedAdapter
+
+            var isScrolling=false
+            addOnScrollListener(object: RecyclerView.OnScrollListener(){
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    isScrolling = newState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE
+                }
+
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    feedAdapter?.let {
+                        if (it.itemCount % Constants.FEED_PAGINATION_LIMIT == 0 &&
+                            linearLayoutManager.findLastCompletelyVisibleItemPosition() == it.itemCount - 1 &&
+                            isScrolling && !isLoading) {
+
+                            isLoading = true
+                            pageNum++
+                            it.submitPaginationLoading()
+                            this@apply.scrollToPosition(it.itemCount - 1)
+                            setData()
+                        }
+                    }
+                }
+            })
         }
     }
 
@@ -161,18 +191,30 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
 
         binding.profileSwipeRefresh.setOnRefreshListener {
             feedAdapter?.submitLoading()
-            setObservers()
+            setData()
             binding.profileSwipeRefresh.isRefreshing = false
         }
     }
 
     private fun setObservers(){
-        viewModel.getUserFeed(displayUser.id.toString(), token, this).observe(viewLifecycleOwner){
-            if (it.status == 200 && it.data != null){
-                feedAdapter?.submitList(it.data)
+        viewModel.setUserFeedObserver().observe(viewLifecycleOwner){
+            if (it.status == 200){
+                it.data?.let { data ->
+                    printLog("$data")
+                    if (pageNum <= 1)
+                        feedAdapter?.submitList(data)
+                    else {
+                        isLoading = false
+                        feedAdapter?.updateList(data)
+                    }
+                } ?: feedAdapter?.submitPaginationError()
             }else
                 onError(it.message)
         }
+    }
+
+    private fun setData(){
+        viewModel.getUserFeed(displayUser.id.toString(), pageNum, token, this)
     }
 
     private fun onActivityResult(result: ActivityResult) {
