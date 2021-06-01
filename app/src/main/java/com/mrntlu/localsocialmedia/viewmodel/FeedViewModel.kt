@@ -3,6 +3,7 @@ package com.mrntlu.localsocialmedia.viewmodel
 import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.mrntlu.localsocialmedia.service.model.CommentModel
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserFollowModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.CommentBody
@@ -21,6 +22,8 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
     private lateinit var userFeedLiveData: MutableLiveData<BaseResponse<ArrayList<FeedModel>>>
     private lateinit var feedFollowingLiveData: MutableLiveData<BaseResponse<ArrayList<FeedModel>>>
     private lateinit var feedLocationLiveData: MutableLiveData<BaseResponse<ArrayList<FeedModel>>>
+
+    private lateinit var commentsLiveData: MutableLiveData<BaseResponse<ArrayList<CommentModel>>>
 
     fun setUserFeedObserver(): LiveData<BaseResponse<ArrayList<FeedModel>>> {
         userFeedLiveData = MutableLiveData()
@@ -52,12 +55,19 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
             apiClient.getFeedsByLocation(latitude, longitude, distance, page, token)
         }
 
-    fun postFeed(body: FeedBody, userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
-        apiClient.postFeed(body, userID, token)
+    fun setCommentsObserver(): LiveData<BaseResponse<ArrayList<CommentModel>>> {
+        commentsLiveData = MutableLiveData()
+        return commentsLiveData
     }
 
-    fun getFeedComments(feedID: String, page: Int, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
-        apiClient.getFeedComments(feedID, page, token)
+    fun getFeedComments(feedID: String, page: Int, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) =
+        basePaginationRequest(commentsLiveData, coroutinesErrorHandler){
+            apiClient.getFeedComments(feedID, page, token)
+        }
+
+    //POST, PUT, DELETE
+    fun postFeed(body: FeedBody, userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.postFeed(body, userID, token)
     }
 
     fun postComment(body: CommentBody, feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){

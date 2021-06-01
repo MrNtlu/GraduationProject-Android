@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler {
 
     private var feedAdapter: FeedAdapter? = null
+    private var feedController: FeedController? = null
     private val viewModel: FeedViewModel by viewModels()
 
     private var isLoading = false
@@ -58,7 +59,16 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
                 }
 
                 override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
-                    TODO("Not yet implemented")
+                    val observer = feedController?.voteClickHandler(
+                        voteType, viewModel, feedModel, token, feedController!!.dialogErrorHandler(context)
+                    )
+
+                    observer?.observe(viewLifecycleOwner){ response ->
+                        if (response.status == 200 && response.data != null){
+                            feedAdapter?.updateItem(position, response.data)
+                        }
+                        observer.removeObservers(viewLifecycleOwner)
+                    }
                 }
 
                 override fun onErrorRefreshPressed() {
@@ -125,5 +135,6 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
     override fun onDestroyView() {
         super.onDestroyView()
         feedAdapter = null
+        feedController = null
     }
 }

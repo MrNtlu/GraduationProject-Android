@@ -24,15 +24,14 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentHomeBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
-import com.mrntlu.localsocialmedia.service.model.UserVoteModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
-import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.VoteBody
 import com.mrntlu.localsocialmedia.utils.Constants
-import com.mrntlu.localsocialmedia.utils.printLog
+import com.mrntlu.localsocialmedia.utils.DialogButtons
+import com.mrntlu.localsocialmedia.utils.MaterialDialogUtil
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
-import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
 import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
@@ -45,6 +44,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     private val viewModel: FeedViewModel by viewModels()
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
+    private var feedController: FeedController? = null
     private var marker: Marker? = null
     private var circle: Circle? = null
     private var mMap: GoogleMap? = null
@@ -76,6 +76,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        feedController = FeedController()
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(view.context)
         setMap()
         if (!checkPermissions(view.context))
@@ -144,37 +145,37 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
             layoutManager = linearLayoutManager
             feedAdapter = FeedAdapter(currentUser, object: FeedInteraction {
                 override fun onItemSelected(position: Int, item: FeedModel) {
-                    printLog("Feed item clicked $item")
+                    val bundle = Bundle()
+                    bundle.putParcelable(FeedDetailsFragment.FEED_MODEL_ARG, item)
+                    navController.navigate(R.id.action_homeFragment_to_feedDetailsFragment, bundle)
                 }
 
                 override fun onReportPressed(position: Int, feedModel: FeedModel) {
-                    viewModel.reportFeed(feedModel.id.toString(), token, this@HomeFragment).observe(viewLifecycleOwner){ response ->
-                        if (response.status == 200){
-
-                        }else{
-
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to REPORT?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.reportFeed(feedModel.id.toString(), token, this@HomeFragment).observe(viewLifecycleOwner){ response ->
+                                (activity as MainActivity).setLoadingLayout(false)
+                                MaterialDialogUtil.showInfoDialog(
+                                    context,
+                                    if (response.status == 200) "Success" else "Error!",
+                                    if (response.status == 200) "Thanks for reporting, we will review it as soon as possible." else response.message
+                                )
+                            }
                         }
-                    }
+                    })
                 }
 
                 override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
-                    val observer = if (feedModel.userVote.isVoted){
-                        if (voteType == feedModel.userVote.voteType){
-                            viewModel.deleteFeedVote(feedModel.id.toString(), token, this@HomeFragment)
-                        }else{
-                            viewModel.updateFeedVote(VoteBody(voteType.num), feedModel.id.toString(), token, this@HomeFragment)
-                        }
-                    }else{
-                        viewModel.voteFeed(VoteBody(voteType.num), feedModel.id.toString(), token, this@HomeFragment)
-                    }
+                    val observer = feedController?.voteClickHandler(
+                        voteType, viewModel, feedModel, token, this@HomeFragment
+                    )
 
-                    observer.observe(viewLifecycleOwner){ response ->
-                        printLog("$response")
+                    observer?.observe(viewLifecycleOwner){ response ->
                         if (response.status == 200 && response.data != null){
                             feedAdapter?.updateItem(position, response.data)
-                        }else{
-
                         }
+                        observer.removeObservers(viewLifecycleOwner)
                     }
                 }
 
@@ -185,7 +186,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
             })
             adapter = feedAdapter
 
-            var isScrolling=false
+            var isScrolling = false
             addOnScrollListener(object: RecyclerView.OnScrollListener(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
@@ -234,6 +235,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     }
 
     private fun setListeners(){
+        binding.profileSwipeRefresh.setOnRefreshListener {
+            pageNum = 1
+            feedAdapter?.submitLoading()
+            setData()
+            binding.profileSwipeRefresh.isRefreshing = false
+        }
+
         binding.homeZoomInButton.setOnClickListener {
             if (radius <= 200){ // MAX 200M
                 when (radius) {
@@ -321,9 +329,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         binding.homeMap.onStop()
     }
 
+    @Suppress("SENSELESS_COMPARISON")
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        binding.homeMap.onSaveInstanceState(outState)
+        if (binding != null)
+            binding.homeMap.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
@@ -333,6 +343,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
 
     override fun onDestroyView() {
         feedAdapter = null
+        feedController = null
+        circle?.remove()
+        circle = null
         marker?.remove()
         marker = null
         mMap?.clear()

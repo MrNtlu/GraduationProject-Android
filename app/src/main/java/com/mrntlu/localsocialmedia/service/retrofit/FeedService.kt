@@ -1,5 +1,6 @@
 package com.mrntlu.localsocialmedia.service.retrofit
 
+import com.mrntlu.localsocialmedia.service.model.CommentModel
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.VoteBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.CommentBody
@@ -33,7 +34,7 @@ interface FeedService {
 
 //GET COMMENTS
     @GET("feed/{feed_id}/comments")
-    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("page") page: Int, @Query("key") token: String)
+    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<CommentModel>>
 
     @POST("feed/{feed_id}/create")
     suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String)

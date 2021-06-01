@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +20,8 @@ import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
 import com.mrntlu.localsocialmedia.utils.isDarkThemeOn
-import com.mrntlu.localsocialmedia.utils.printLog
 import com.mrntlu.localsocialmedia.utils.setGone
+import com.mrntlu.localsocialmedia.utils.setUI
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.EmptyItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.ErrorItemViewHolder
@@ -49,40 +50,26 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
             }
 
             binding.feedUpVoteButton.setOnClickListener {
-                printLog("UpvotePressed")
                 interaction?.onVotePressed(VoteType.UpVote, adapterPosition, item)
             }
 
             binding.feedDownVoteButton.setOnClickListener {
-                printLog("DownvotePressed")
                 interaction?.onVotePressed(VoteType.DownVote, adapterPosition, item)
             }
 
+            binding.feedMoreButton.setOnClickListener {
+                val popup = PopupMenu(it.context, it)
+                popup.inflate(R.menu.report_menu)
+                popup.setOnMenuItemClickListener { menuItem ->
+                    if (menuItem.itemId == R.id.reportMenu)
+                        interaction?.onReportPressed(adapterPosition, item)
+                    true
+                }
+                popup.show()
+            }
+
             item.apply {
-                author.imageUri?.let {
-                    Glide.with(binding.feedAuthorImage)
-                        .load(it)
-                        .addListener(object: RequestListener<Drawable> {
-                            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
-                                binding.feedAuthorImageProgress.setGone()
-                                return false
-                            }
-
-                            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                                binding.feedAuthorImageProgress.setGone()
-                                return false
-                            }
-
-                        })
-                        .placeholder(ResourcesCompat.getDrawable(binding.feedAuthorImage.context.resources,R.drawable.ic_account_126,null))
-                        .into(binding.feedAuthorImage)
-                } ?: binding.feedAuthorImage.setImageResource(R.drawable.ic_account_126)
-
-                binding.feedAuthorNameText.text = author.name
-                binding.feedAuthorUsernameText.text = author.username
-                binding.feedBodyText.text = message
-                binding.feedPostDateText.text = postedDate
-                binding.feedVoteText.text = (upvoteCount - downvoteCount).toString()
+                binding.setUI(this)
 
                 var upVote = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.white)
                 var downVote = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.white)

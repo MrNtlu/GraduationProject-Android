@@ -34,7 +34,6 @@ import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
 import com.mrntlu.localsocialmedia.utils.*
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
-import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
 import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
 import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
@@ -49,6 +48,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
     private lateinit var userModel: UserModel
     private val viewModel: FeedViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
+    private var feedController: FeedController? = null
     private var feedAdapter: FeedAdapter? = null
     private var isCurrentUser = false
 
@@ -96,6 +96,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         isCurrentUser = !::userModel.isInitialized
+        feedController = FeedController()
         (activity as MainActivity).setToolbarBackButton(!isCurrentUser)
 
         setUI(view)
@@ -142,7 +143,9 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
             layoutManager = linearLayoutManager
             feedAdapter = FeedAdapter(currentUser, object: FeedInteraction{
                 override fun onItemSelected(position: Int, item: FeedModel) {
-                    printLog("Feed item clicked $item")
+                    val bundle = Bundle()
+                    bundle.putParcelable(FeedDetailsFragment.FEED_MODEL_ARG, item)
+                    navController.navigate(R.id.action_profileFragment_to_feedDetailsFragment, bundle)
                 }
 
                 override fun onReportPressed(position: Int, feedModel: FeedModel) {
@@ -150,7 +153,16 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
                 }
 
                 override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
-                    TODO("Not yet implemented")
+                    val observer = feedController?.voteClickHandler(
+                        voteType, viewModel, feedModel, token, feedController!!.dialogErrorHandler(context)
+                    )
+
+                    observer?.observe(viewLifecycleOwner){ response ->
+                        if (response.status == 200 && response.data != null){
+                            feedAdapter?.updateItem(position, response.data)
+                        }
+                        observer.removeObservers(viewLifecycleOwner)
+                    }
                 }
 
                 override fun onErrorRefreshPressed() {
@@ -160,7 +172,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
             })
             adapter = feedAdapter
 
-            var isScrolling=false
+            var isScrolling = false
             addOnScrollListener(object: RecyclerView.OnScrollListener(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
@@ -200,6 +212,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
         }
 
         binding.profileSwipeRefresh.setOnRefreshListener {
+            pageNum = 1
             feedAdapter?.submitLoading()
             setData()
             binding.profileSwipeRefresh.isRefreshing = false
@@ -210,7 +223,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
         viewModel.setUserFeedObserver().observe(viewLifecycleOwner){
             if (it.status == 200){
                 it.data?.let { data ->
-                    printLog("$data")
                     if (pageNum <= 1)
                         feedAdapter?.submitList(data)
                     else {
@@ -336,5 +348,6 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
     override fun onDestroyView() {
         super.onDestroyView()
         feedAdapter = null
+        feedController = null
     }
 }

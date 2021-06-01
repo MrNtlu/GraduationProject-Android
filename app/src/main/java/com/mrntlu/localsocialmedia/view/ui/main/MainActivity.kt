@@ -72,6 +72,10 @@ class MainActivity : AppCompatActivity(), CoroutinesErrorHandler {
         binding.mainToolbar.setNavigationOnClickListener { onBackPressed() }
     }
 
+    fun setLoadingLayout(isVisible: Boolean){
+        binding.loadingLayout.root.isVisible = isVisible
+    }
+
     override fun onError(message: String) {
         lifecycleScope.launch {
             whenResumed {
