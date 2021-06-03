@@ -7,30 +7,29 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentHomeBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
-import com.mrntlu.localsocialmedia.utils.Constants
-import com.mrntlu.localsocialmedia.utils.DialogButtons
-import com.mrntlu.localsocialmedia.utils.MaterialDialogUtil
+import com.mrntlu.localsocialmedia.utils.*
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
 import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
@@ -48,6 +47,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     private var marker: Marker? = null
     private var circle: Circle? = null
     private var mMap: GoogleMap? = null
+    private var cancellationToken = CancellationTokenSource()
     private var mLocation: LatLng? = null
     private var isLoading = false
     private var pageNum = 1
@@ -62,7 +62,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         }
         context?.let {
             if (isPermissionsGranted)
-                getCurrentUserLocation(it)
+                getLastKnownUserLocation(it)
             else
                 Toast.makeText(it, "Couldn't get the permission.", Toast.LENGTH_SHORT).show()
         }
@@ -76,17 +76,18 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as MainActivity).setToolbarBackButton(false)
+        setHasOptionsMenu(true)
         feedController = FeedController()
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(view.context)
         setMap()
         if (!checkPermissions(view.context))
             requestPermission()
         else
-            getCurrentUserLocation(view.context)
+            getLastKnownUserLocation(view.context)
 
         setRecyclerView()
         setObservers()
-        setData()
         setListeners()
     }
 
@@ -230,7 +231,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
 
     private fun setData(){
         viewModel.getFeedsByLocation(
-            40.97446f, 29.24127f, 3,
+            mLocation!!.latitude.toFloat() , mLocation!!.longitude.toFloat(), radius.toInt(),
             pageNum, token, this)
     }
 
@@ -257,6 +258,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                 }
             }
             setCircle()
+            pageNum = 1
+            feedAdapter?.submitLoading()
+            setData()
         }
 
         binding.homeZoomOutButton.setOnClickListener {
@@ -274,6 +278,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                 }
             }
             setCircle()
+            pageNum = 1
+            feedAdapter?.submitLoading()
+            setData()
         }
     }
 
@@ -295,17 +302,53 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     }
 
     @SuppressLint("MissingPermission")
-    private fun getCurrentUserLocation(context: Context) {
+    private fun getLastKnownUserLocation(context: Context) {
         if (!checkPermissions(context))
             requestPermission()
         else {
             mFusedLocationClient?.lastLocation?.addOnSuccessListener { location: Location? ->
                 location?.let {
-                    mLocation = LatLng(it.latitude, it.longitude)
-                    setMarker()
-                    setCircle()
-                } ?: Toast.makeText(context, "Couldn't get location.", Toast.LENGTH_SHORT).show()
+                    onUserLocationReceivedHandler(it)
+                } ?: requestUserLocation()
             }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun requestUserLocation(){
+        val loadingText = "Please wait while we are getting your location..."
+        binding.homeLoadingLayout.textView.text = loadingText
+        binding.homeLoadingLayout.root.setVisible()
+        mFusedLocationClient?.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationToken.token)?.addOnSuccessListener { location: Location? ->
+            binding.homeLoadingLayout.root.setGone()
+            location?.let {
+                onUserLocationReceivedHandler(it)
+            } ?: Toast.makeText(context, "Couldn't get location.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun onUserLocationReceivedHandler(location: Location){
+        mLocation = LatLng(location.latitude, location.longitude)
+        setData()
+        setMarker()
+        setCircle()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.add_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.add_menu -> {
+                navController.navigate(
+                    R.id.action_homeFragment_to_postFeedFragment,
+                    bundleOf(PostFeedFragment.DIRECTION_ARG to 0)
+                )
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -327,12 +370,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     override fun onStop() {
         super.onStop()
         binding.homeMap.onStop()
+        cancellationToken.cancel()
     }
 
     @Suppress("SENSELESS_COMPARISON")
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (binding != null)
+        if (_binding != null)
             binding.homeMap.onSaveInstanceState(outState)
     }
 
@@ -342,6 +386,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     }
 
     override fun onDestroyView() {
+        cancellationToken.cancel()
         feedAdapter = null
         feedController = null
         circle?.remove()

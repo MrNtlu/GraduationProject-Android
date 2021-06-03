@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.drawable.Drawable
+import android.location.Geocoder
+import android.location.Location
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
@@ -21,6 +23,7 @@ import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserVoteModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
 import com.mrntlu.localsocialmedia.view.ui.main.MainActivity
+import java.lang.Exception
 import java.util.*
 
 fun View.setGone() {
@@ -111,4 +114,35 @@ fun CellFeedBinding.setVoteUI(context: Context, userVote: UserVoteModel){
     }
     feedUpVoteButton.imageTintList = ColorStateList.valueOf(upVote)
     feedDownVoteButton.imageTintList = ColorStateList.valueOf(downVote)
+}
+
+fun Location.getLocationName(context: Context): String {
+    val locationName: String
+
+    val geocoder = Geocoder(context, Locale.getDefault())
+    try {
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        if (addresses.size > 0){
+            val address = addresses[0]
+            locationName = address?.let {
+                if (it.adminArea.isNotEmptyOrBlank() && it.subAdminArea.isNotEmptyOrBlank()){
+                    "${it.subAdminArea}/${it.adminArea}"
+                }else{
+                    if (it.adminArea.isNotEmptyOrBlank())
+                        it.adminArea
+                    else if (it.subAdminArea.isNotEmptyOrBlank())
+                        it.subAdminArea
+                    else if (it.countryName != null && it.countryName.isNotEmptyOrBlank())
+                        it.countryName
+                    else
+                        "Unknown"
+                }
+            } ?: "Unknown"
+        }else
+            locationName = "Unknown"
+
+        return locationName
+    }catch (e: Exception){
+        return "Unknown"
+    }
 }

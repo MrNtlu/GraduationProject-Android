@@ -1,21 +1,19 @@
 package com.mrntlu.localsocialmedia.view.ui.main
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AbsListView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.FragmentFeedBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
-import com.mrntlu.localsocialmedia.utils.Constants
-import com.mrntlu.localsocialmedia.utils.printLog
-import com.mrntlu.localsocialmedia.utils.setToolbarBackButton
+import com.mrntlu.localsocialmedia.utils.*
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.view.adapter.FeedAdapter
 import com.mrntlu.localsocialmedia.view.adapter.FeedInteraction
@@ -38,6 +36,7 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         (activity as MainActivity).setToolbarBackButton(false)
 
         setRecyclerView()
@@ -51,11 +50,26 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
             layoutManager = linearLayoutManager
             feedAdapter = FeedAdapter(currentUser, object: FeedInteraction {
                 override fun onItemSelected(position: Int, item: FeedModel) {
-                    printLog("Feed item clicked $item")
+                    val bundle = Bundle()
+                    bundle.putParcelable(FeedDetailsFragment.FEED_MODEL_ARG, item)
+                    navController.navigate(R.id.action_feedFragment_to_feedDetailsFragment, bundle)
                 }
 
                 override fun onReportPressed(position: Int, feedModel: FeedModel) {
-                    TODO("Not yet implemented")
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to REPORT?", object:
+                        DialogButtons {
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.reportFeed(feedModel.id.toString(), token, this@FeedFragment).observe(viewLifecycleOwner){ response ->
+                                (activity as MainActivity).setLoadingLayout(false)
+                                MaterialDialogUtil.showInfoDialog(
+                                    context,
+                                    if (response.status == 200) "Success" else "Error!",
+                                    if (response.status == 200) "Thanks for reporting, we will review it as soon as possible." else response.message
+                                )
+                            }
+                        }
+                    })
                 }
 
                 override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
@@ -129,6 +143,24 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
             whenResumed {
                 feedAdapter?.submitError(message)
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.add_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.add_menu -> {
+                navController.navigate(
+                    R.id.action_feedFragment_to_postFeedFragment,
+                    bundleOf(PostFeedFragment.DIRECTION_ARG to 1)
+                )
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

@@ -206,4 +206,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <include
+        android:id="@+id/profileLoading"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        layout="@layout/loading_layout"
+        android:visibility="gone"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

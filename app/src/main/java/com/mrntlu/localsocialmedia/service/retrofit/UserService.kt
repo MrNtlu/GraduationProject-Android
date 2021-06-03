@@ -1,5 +1,6 @@
 package com.mrntlu.localsocialmedia.service.retrofit
 
+import com.google.gson.JsonObject
 import com.mrntlu.localsocialmedia.service.model.UserFollowModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
@@ -30,4 +31,12 @@ interface UserService {
         @Query("key") token: String,
         @Part part: MultipartBody.Part
     ): BaseResponse<Unit>
+
+    @PUT("change_password/{user_id}")
+    suspend fun changePassword(
+        @Header("Authorization") token: String,
+        @Query("old_password") oldPassword: String,
+        @Query("password") password: String,
+        @Query("password2") rePassword: String
+    ): JsonObject
 }

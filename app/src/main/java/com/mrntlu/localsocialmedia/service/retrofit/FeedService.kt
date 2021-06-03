@@ -30,14 +30,7 @@ interface FeedService {
     suspend fun getFeedByFollowings(@Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<FeedModel>>
 
     @POST("create/feed")
-    suspend fun postFeed(@Body body: FeedBody, @Path("feed_id") feedID: String, @Query("key") token: String)
-
-//GET COMMENTS
-    @GET("feed/{feed_id}/comments")
-    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<CommentModel>>
-
-    @POST("feed/{feed_id}/create")
-    suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String)
+    suspend fun postFeed(@Body body: FeedBody, @Query("key") token: String): BaseResponse<FeedModel>
 
 //HANDLE VOTE REPORT
     @POST("feed/{feed_id}/vote")
@@ -51,6 +44,22 @@ interface FeedService {
 
     @POST("feed/{feed_id}/report")
     suspend fun reportFeed(@Path("feed_id") feedID: String, @Query("key") token: String):  BaseResponse<Unit>
+
+//GET COMMENTS
+    @GET("feed/{feed_id}/comments")
+    suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("page") page: Int, @Query("sort") sort: String, @Query("key") token: String): BaseResponse<ArrayList<CommentModel>>
+
+    @POST("feed/{feed_id}/create")
+    suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<CommentModel>
+
+    @POST("comment/{comment_id}/like")
+    suspend fun likeComment(@Path("comment_id") commentID: String, @Query("key") token: String): BaseResponse<CommentModel>
+
+    @DELETE("comment/{comment_id}/like")
+    suspend fun deleteLikeComment(@Path("comment_id") commentID: String, @Query("key") token: String): BaseResponse<CommentModel>
+
+    @POST("comment/{comment_id}/report")
+    suspend fun reportComment(@Path("comment_id") commentID: String, @Query("key") token: String): BaseResponse<Unit>
 
     //TODO Search in all feeds?
     /*

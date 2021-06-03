@@ -95,10 +95,29 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        isCurrentUser = !::userModel.isInitialized
+        isCurrentUser = (!::userModel.isInitialized || (::userModel.isInitialized && userModel.id == currentUser.id))
         feedController = FeedController()
         (activity as MainActivity).setToolbarBackButton(!isCurrentUser)
 
+        if (isCurrentUser){
+            binding.profileLoading.root.setVisible()
+            userViewModel.getUserInfo(displayUser.id.toString(), token, object: CoroutinesErrorHandler{
+                override fun onError(message: String) {
+                    setUIWhenReady(view)
+                }
+            }).observe(viewLifecycleOwner){ response ->
+                binding.profileLoading.root.setGone()
+                if (response.status == 200 && response.data != null) {
+                    (activity as MainActivity).currentUser = response.data
+                    currentUser = response.data
+                }
+                setUIWhenReady(view)
+            }
+        }else
+            setUIWhenReady(view)
+    }
+
+    private fun setUIWhenReady(view: View){
         setUI(view)
         setRecyclerView()
         setListeners()

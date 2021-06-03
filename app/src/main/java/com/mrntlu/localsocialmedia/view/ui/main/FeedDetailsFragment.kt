@@ -26,10 +26,16 @@ import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
 import kotlinx.coroutines.launch
 
 class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), CoroutinesErrorHandler {
+    private enum class SortType(val sort: String){
+        LIKE_DESC("-like"),
+        DATE_ASC("postedDate"),
+        DATE_DESC("-postedDate")
+    }
 
     private val viewModel: FeedViewModel by viewModels()
     private var isLoading = false
     private var pageNum = 1
+    private var sortType = SortType.DATE_DESC
     private var commentAdapter: CommentAdapter? = null
     private var feedController: FeedController? = null
 
@@ -142,7 +148,7 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
     }
 
     private fun setData(){
-        viewModel.getFeedComments(feedModel.id.toString(), pageNum, token, this)
+        viewModel.getFeedComments(feedModel.id.toString(), pageNum, sortType.sort, token,this)
     }
 
     private fun setListeners(){

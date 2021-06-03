@@ -60,18 +60,14 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
         return commentsLiveData
     }
 
-    fun getFeedComments(feedID: String, page: Int, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) =
+    fun getFeedComments(feedID: String, page: Int, sort: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) =
         basePaginationRequest(commentsLiveData, coroutinesErrorHandler){
-            apiClient.getFeedComments(feedID, page, token)
+            apiClient.getFeedComments(feedID, page, sort, token)
         }
 
     //POST, PUT, DELETE
-    fun postFeed(body: FeedBody, userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
-        apiClient.postFeed(body, userID, token)
-    }
-
-    fun postComment(body: CommentBody, feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
-        apiClient.postComment(body, feedID, token)
+    fun postFeed(body: FeedBody, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.postFeed(body, token)
     }
 
     fun voteFeed(body: VoteBody, feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
@@ -88,5 +84,21 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
 
     fun reportFeed(feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
         apiClient.reportFeed(feedID, token)
+    }
+
+    fun postComment(body: CommentBody, feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.postComment(body, feedID, token)
+    }
+
+    fun likeComment(commentID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.likeComment(commentID, token)
+    }
+
+    fun deleteLikeComment(commentID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.deleteLikeComment(commentID, token)
+    }
+
+    fun reportComment(commentID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.reportComment(commentID, token)
     }
 }

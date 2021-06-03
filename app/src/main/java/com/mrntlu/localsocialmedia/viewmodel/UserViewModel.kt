@@ -9,6 +9,8 @@ import com.mrntlu.localsocialmedia.service.retrofit.RetrofitClient
 import com.mrntlu.localsocialmedia.service.retrofit.UserService
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import okhttp3.MultipartBody
+import retrofit2.http.Header
+import retrofit2.http.Query
 
 class UserViewModel(application: Application): BaseViewModel(application) {
 
@@ -51,5 +53,9 @@ class UserViewModel(application: Application): BaseViewModel(application) {
 
     fun updateUserInfo(userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
         apiClient.updateUserInfo(userID, token)
+    }
+
+    fun changePassword(token: String, oldPassword: String, password: String, rePassword: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.changePassword(token, oldPassword, password, rePassword)
     }
 }
