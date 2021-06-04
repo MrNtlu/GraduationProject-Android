@@ -104,15 +104,12 @@ abstract class BaseAdapter<T>(open val interaction: Interaction<T>? = null) :
                 arrayList.addAll(newList)
                 notifyDataSetChanged()
             } else {
-                if ((newList.size - arrayList.size) > 0) {
-                    submitPaginationError()
+                submitPaginationError()
 
-                    val diffResult = DiffUtil.calculateDiff(GenericDiffUtil(arrayList, newList))
+                val diffResult = DiffUtil.calculateDiff(GenericDiffUtil(arrayList, newList))
 
-                    arrayList.addAll(0, newList.subList(0, (newList.size - arrayList.size)))
-                    diffResult.dispatchUpdatesTo(this)
-                } else
-                    submitPaginationError()
+                arrayList.addAll(0, newList)
+                diffResult.dispatchUpdatesTo(this)
             }
         }
     }

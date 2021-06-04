@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import java.text.SimpleDateFormat
 import java.util.*
 
+@SuppressLint("ConstantLocale")
 class Constants {
     companion object{
-        @SuppressLint("ConstantLocale")
         val CUSTOM_TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.getDefault())
-        var CUSTOM_DATE_LONG_FORMAT = SimpleDateFormat("MMM dd',' yy 'at' HH:mm", Locale.getDefault())
+        var CUSTOM_DATE_FORMAT = SimpleDateFormat("MMM dd',' yyyy", Locale.getDefault())
+        var CUSTOM_DATE_DETAILS_FORMAT = SimpleDateFormat("MMMM dd',' yyyy '·' HH:mm:ss", Locale.getDefault())
+        val DJANGO_DATE_FORMAT = SimpleDateFormat("yyyy/MM/dd '-' HH:mm:ss", Locale.getDefault())
 
         const val API_URL = "http://192.168.1.13:8000/api/"
         const val URL = "http://192.168.1.13:8000"

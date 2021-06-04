@@ -1,9 +1,12 @@
 package com.mrntlu.localsocialmedia.view.adapter
 
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -14,6 +17,7 @@ import com.bumptech.glide.request.target.Target
 import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.CellCommentBinding
 import com.mrntlu.localsocialmedia.service.model.CommentModel
+import com.mrntlu.localsocialmedia.utils.isDarkThemeOn
 import com.mrntlu.localsocialmedia.utils.setGone
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.BaseAdapter.HolderType.*
@@ -43,7 +47,18 @@ class CommentAdapter(override val interaction: CommentInteraction): BaseAdapter<
             }
 
             binding.commentMoreButton.setOnClickListener {
-                interaction?.onReportPressed(adapterPosition, item)
+                val popup = PopupMenu(it.context, it)
+                popup.inflate(R.menu.report_menu)
+                popup.setOnMenuItemClickListener { menuItem ->
+                    if (menuItem.itemId == R.id.reportMenu)
+                        interaction?.onReportPressed(adapterPosition, item)
+                    true
+                }
+                popup.show()
+            }
+
+            binding.commentFavButton.setOnClickListener {
+                interaction?.onFavPressed(adapterPosition, item)
             }
 
             item.apply {
@@ -70,11 +85,26 @@ class CommentAdapter(override val interaction: CommentInteraction): BaseAdapter<
                 binding.commentAuthorUsernameText.text = author.username
                 binding.commentBodyText.text = message
                 binding.commentPostDateText.text = postedDate
+
+                val favColor: Int
+                val favIcon: Drawable?
+
+                if (isLiked){
+                    favColor = ContextCompat.getColor(itemView.context, R.color.redMaterial400)
+                    favIcon = ContextCompat.getDrawable(itemView.context, R.drawable.ic_fav)
+                }else{
+                    favColor = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.black)
+                    favIcon = ContextCompat.getDrawable(itemView.context, R.drawable.ic_unfav)
+                }
+
+                binding.commentFavButton.imageTintList = ColorStateList.valueOf(favColor)
+                binding.commentFavButton.setImageDrawable(favIcon)
             }
         }
     }
 }
 
 interface CommentInteraction: Interaction<CommentModel>{
+    fun onFavPressed(position: Int, commentModel: CommentModel)
     fun onReportPressed(position: Int, commentModel: CommentModel)
 }

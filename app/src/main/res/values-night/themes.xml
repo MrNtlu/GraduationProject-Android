@@ -24,7 +24,7 @@
         <item name="contentBackground">@color/lightBlack</item>
 
         <item name="editTextColor">@color/white</item>
-        <item name="editTextHintColor">@color/darkWhite</item>
+        <item name="editTextHintColor">@color/hintGrey</item>
         <item name="editTextBackgroundColor">@color/black</item>
         <item name="editTextLayoutBackgroundColor">@color/black</item>
 

@@ -19,9 +19,8 @@ import com.mrntlu.localsocialmedia.databinding.CellFeedBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
-import com.mrntlu.localsocialmedia.utils.isDarkThemeOn
-import com.mrntlu.localsocialmedia.utils.setGone
 import com.mrntlu.localsocialmedia.utils.setUI
+import com.mrntlu.localsocialmedia.utils.setVoteUI
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.EmptyItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.ErrorItemViewHolder
@@ -70,21 +69,7 @@ class FeedAdapter(private val currentUser: UserModel, override val interaction: 
 
             item.apply {
                 binding.setUI(this)
-
-                var upVote = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.white)
-                var downVote = ContextCompat.getColor(itemView.context, if (itemView.context.isDarkThemeOn()) R.color.white else R.color.white)
-                if (userVote.isVoted){
-                    when(userVote.voteType){
-                        VoteType.UpVote->{
-                            upVote = ContextCompat.getColor(itemView.context, R.color.greenMaterial400)
-                        }
-                        VoteType.DownVote->{
-                            downVote = ContextCompat.getColor(itemView.context, R.color.redMaterial400)
-                        }
-                    }
-                }
-                binding.feedUpVoteButton.imageTintList = ColorStateList.valueOf(upVote)
-                binding.feedDownVoteButton.imageTintList = ColorStateList.valueOf(downVote)
+                binding.setVoteUI(itemView.context, userVote)
             }
         }
     }

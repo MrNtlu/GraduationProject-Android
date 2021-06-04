@@ -9,7 +9,6 @@ import android.location.Geocoder
 import android.location.Location
 import android.util.Log
 import android.view.View
-import android.widget.ImageButton
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.bumptech.glide.Glide
@@ -23,8 +22,8 @@ import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserVoteModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
 import com.mrntlu.localsocialmedia.view.ui.main.MainActivity
-import java.lang.Exception
 import java.util.*
+import kotlin.math.roundToInt
 
 fun View.setGone() {
     this.visibility = View.GONE
@@ -44,6 +43,58 @@ fun String.isNotEmptyOrBlank(): Boolean{
 
 fun printLog(message: String){
     Log.d("Test", message)
+}
+
+fun String.convertToDate(): String{
+    val date = Constants.DJANGO_DATE_FORMAT.parse(this)
+    date?.let {
+        val timeElapsed = Date().time - date.time
+
+        val oneMin = 60000L
+        val oneHour = 3600000L
+        val oneDay = 86400000L
+        val oneWeek = 604800000L
+
+        var finalString = "0 sec"
+        val unit: String
+
+        if (timeElapsed < oneMin){
+            var seconds = (timeElapsed / 1000).toDouble()
+            seconds = seconds.roundToInt().toDouble()
+            if (seconds < 30) {
+                finalString = "Now."
+            }else{
+                unit = " secs ago."
+                finalString = "${seconds.toInt()} $unit"
+            }
+        }else if (timeElapsed < oneHour){
+            val minutes = (timeElapsed / 1000) / 60
+            finalString = handleAgoString(minutes.toDouble(), " min")
+        }else if (timeElapsed < oneDay){
+            val hours = ((timeElapsed / 1000) / 60) / 60
+            finalString = handleAgoString(hours.toDouble(), " hr")
+        }else if (timeElapsed < oneWeek){
+            val days = (((timeElapsed / 1000) / 60) / 60) / 24
+            finalString = handleAgoString(days.toDouble(), " day")
+        }else if (timeElapsed > oneWeek){
+            val weeks = ((((timeElapsed / 1000) / 60) / 60) / 24) / 7
+            finalString = if (weeks.toInt() < 4)
+                handleAgoString(weeks.toDouble(), " week")
+            else{
+                Constants.CUSTOM_DATE_FORMAT.format(it).toString()
+            }
+        }
+        return finalString
+    }
+    return this
+}
+
+private fun handleAgoString(ago: Double, agoString: String): String{
+    val agoInt = ago.roundToInt()
+    var returnString = agoString
+    if (ago.toInt() != 1)
+        returnString = "${agoString}s"
+    return "$agoInt$returnString ago."
 }
 
 fun MainActivity.setToolbarBackButton(isEnabled: Boolean){
@@ -68,7 +119,7 @@ fun Date.isYesterday(): Boolean{
             && now.get(Calendar.DATE) == compareDate.get(Calendar.DATE)
 }
 
-fun CellFeedBinding.setUI(feedModel: FeedModel){
+fun CellFeedBinding.setUI(feedModel: FeedModel, isDetailsPage: Boolean = false){
     feedModel.apply {
         author.imageUri?.let {
             Glide.with(feedAuthorImage)
@@ -94,14 +145,20 @@ fun CellFeedBinding.setUI(feedModel: FeedModel){
         feedAuthorNameText.text = author.name
         feedAuthorUsernameText.text = author.username
         feedBodyText.text = message
-        feedPostDateText.text = postedDate
+        feedPostDateText.text = if (!isDetailsPage)
+            postedDate.convertToDate()
+        else {
+            Constants.DJANGO_DATE_FORMAT.parse(postedDate)?.let {
+                Constants.CUSTOM_DATE_DETAILS_FORMAT.format(it)
+            } ?: postedDate.convertToDate()
+        }
         feedVoteText.text = (upvoteCount - downvoteCount).toString()
     }
 }
 
 fun CellFeedBinding.setVoteUI(context: Context, userVote: UserVoteModel){
-    var upVote = ContextCompat.getColor(context, if (context.isDarkThemeOn()) R.color.white else R.color.white)
-    var downVote = ContextCompat.getColor(context, if (context.isDarkThemeOn()) R.color.white else R.color.white)
+    var upVote = ContextCompat.getColor(context, if (context.isDarkThemeOn()) R.color.white else R.color.black)
+    var downVote = ContextCompat.getColor(context, if (context.isDarkThemeOn()) R.color.white else R.color.black)
     if (userVote.isVoted){
         when(userVote.voteType){
             VoteType.UpVote -> {

@@ -53,4 +53,5 @@
     <string name="add">Add</string>
     <string name="post">Post</string>
     <string name="post_feed_hint">Whats happening?</string>
+    <string name="comment_hint">What do you think?</string>
 </resources>

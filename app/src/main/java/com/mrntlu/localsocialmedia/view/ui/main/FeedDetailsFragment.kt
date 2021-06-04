@@ -18,6 +18,7 @@ import com.mrntlu.localsocialmedia.databinding.FragmentFeedDetailsBinding
 import com.mrntlu.localsocialmedia.service.model.CommentModel
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.CommentBody
 import com.mrntlu.localsocialmedia.utils.*
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
 import com.mrntlu.localsocialmedia.view.adapter.CommentAdapter
@@ -77,7 +78,7 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
 
     private fun setUI(context: Context) {
         feedModel.apply {
-            feedBinding.setUI(this)
+            feedBinding.setUI(this, true)
             feedBinding.setVoteUI(context, userVote)
         }
     }
@@ -89,11 +90,33 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
             commentAdapter = CommentAdapter(object: CommentInteraction{
                 override fun onItemSelected(position: Int, item: CommentModel) {}
 
+                override fun onFavPressed(position: Int, commentModel: CommentModel) {
+                    val observer = if (commentModel.isLiked)
+                        viewModel.deleteLikeComment(commentModel.id.toString(), token, feedController!!.dialogErrorHandler(context))
+                    else
+                        viewModel.likeComment(commentModel.id.toString(), token, feedController!!.dialogErrorHandler(context))
+
+                    observer.observe(viewLifecycleOwner){ response ->
+                        if (response.status == 200 && response.data != null){
+                            commentAdapter?.updateItem(position, response.data)
+                        }else
+                            feedController?.dialogErrorHandler(context)?.onError(response.message)
+                        observer.removeObservers(viewLifecycleOwner)
+                    }
+                }
+
                 override fun onReportPressed(position: Int, commentModel: CommentModel) {
                     MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to REPORT?", object: DialogButtons{
                         override fun positiveButton() {
-                            //(activity as MainActivity).setLoadingLayout(true)
-                            //TODO Report comment
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.reportComment(commentModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                (activity as MainActivity).setLoadingLayout(false)
+                                MaterialDialogUtil.showInfoDialog(
+                                    context,
+                                    if (response.status == 200) "Success" else "Error!",
+                                    if (response.status == 200) "Thanks for reporting, we will review it as soon as possible." else response.message
+                                )
+                            }
                         }
                     })
                 }
@@ -190,6 +213,43 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
                 true
             }
             popup.show()
+        }
+
+        binding.commentPostButton.setOnClickListener {
+            if (binding.commentEditText.text.toString().isNotEmptyOrBlank()){
+                val comment = binding.commentEditText.text.toString()
+                binding.commentEditText.text = null
+                viewModel.postComment(
+                    CommentBody(comment), feedModel.id.toString(),
+                    token, feedController!!.dialogErrorHandler(it.context)
+                ).observe(viewLifecycleOwner){ response ->
+                    if (response.status == 200){
+                        if (sortType == SortType.DATE_DESC){
+                            if (response.data != null)
+                                commentAdapter?.updateList(arrayListOf(response.data))
+                            else{
+                                commentAdapter?.submitLoading()
+                                pageNum = 1
+                                setData()
+                            }
+                        }else{
+                            commentAdapter?.submitLoading()
+                            pageNum = 1
+                            setData()
+                        }
+                    }else
+                        MaterialDialogUtil.showErrorDialog(it.context, response.message)
+                }
+            }else {
+                MaterialDialogUtil.showErrorDialog(it.context, "Please write something.")
+            }
+        }
+
+        binding.commentSwipeRefresh.setOnRefreshListener {
+            pageNum = 1
+            commentAdapter?.submitLoading()
+            setData()
+            binding.commentSwipeRefresh.isRefreshing = false
         }
     }
 

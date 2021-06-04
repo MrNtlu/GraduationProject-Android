@@ -51,7 +51,7 @@ class PostFeedFragment : BaseFragment<FragmentPostFeedBinding>(), CoroutinesErro
     private var cancellationToken = CancellationTokenSource()
     private lateinit var direction: Direction
 
-    companion object{
+    companion object {
         const val DIRECTION_ARG = "direction"
     }
 
