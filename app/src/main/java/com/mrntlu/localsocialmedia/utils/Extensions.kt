@@ -65,7 +65,7 @@ fun String.convertToDate(): String{
                 finalString = "Now."
             }else{
                 unit = " secs ago."
-                finalString = "${seconds.toInt()} $unit"
+                finalString = "${seconds.toInt()}$unit"
             }
         }else if (timeElapsed < oneHour){
             val minutes = (timeElapsed / 1000) / 60

@@ -35,6 +35,10 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
             apiClient.getUserFeed(userID, page, token)
         }
 
+    fun deleteFeed(feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.deleteFeed(feedID, token)
+    }
+
     fun setFeedByFollowings(): LiveData<BaseResponse<ArrayList<FeedModel>>> {
         feedFollowingLiveData = MutableLiveData()
         return feedFollowingLiveData
@@ -64,6 +68,10 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
         basePaginationRequest(commentsLiveData, coroutinesErrorHandler){
             apiClient.getFeedComments(feedID, page, sort, token)
         }
+
+    fun deleteComment(commentID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.deleteComment(commentID, token)
+    }
 
     //POST, PUT, DELETE
     fun postFeed(body: FeedBody, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){

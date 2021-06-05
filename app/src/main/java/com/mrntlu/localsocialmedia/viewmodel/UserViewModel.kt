@@ -47,6 +47,10 @@ class UserViewModel(application: Application): BaseViewModel(application) {
             apiClient.getUserFollowers(userID, page, token)
         }
 
+    fun followUser(userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.followUser(userID, token)
+    }
+
     fun uploadUserImage(userID: String, token: String, part: MultipartBody.Part, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
         apiClient.uploadUserImage(userID, token, part)
     }

@@ -60,7 +60,7 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
             currentUser
         else
             userModel
-
+    //TODO EDIT PAGE UPLOAD IMAGE
     private val imagePickerActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result ->
         onActivityResult(result)
     }
@@ -151,6 +151,18 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
             val usernameText = "@$username"
             binding.profileUsernameText.text = usernameText
             binding.profilePostText.text = postCount.toString()
+
+            handleFollow()
+        }
+    }
+
+    private fun handleFollow(){
+        displayUser.apply {
+            binding.profileFollowButton.text = if (isFollowing)
+                "Unfollow"
+            else
+                "Follow"
+
             binding.profileFollowingText.text = followingCount.toString()
             binding.profileFollowerText.text = followerCount.toString()
         }
@@ -168,7 +180,19 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
                 }
 
                 override fun onReportPressed(position: Int, feedModel: FeedModel) {
-                    TODO("Not yet implemented")
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to REPORT?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.reportFeed(feedModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                (activity as MainActivity).setLoadingLayout(false)
+                                MaterialDialogUtil.showInfoDialog(
+                                    context,
+                                    if (response.status == 200) "Success" else "Error!",
+                                    if (response.status == 200) "Thanks for reporting, we will review it as soon as possible." else response.message
+                                )
+                            }
+                        }
+                    })
                 }
 
                 override fun onVotePressed(voteType: VoteType, position: Int, feedModel: FeedModel) {
@@ -182,6 +206,21 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
                         }
                         observer.removeObservers(viewLifecycleOwner)
                     }
+                }
+
+                override fun onDeletePressed(position: Int, feedModel: FeedModel) {
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to DELETE?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.deleteFeed(feedModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                if (response.status == 200) {
+                                    (activity as MainActivity).setLoadingLayout(false)
+                                    feedAdapter?.removeItem(position, feedModel)
+                                }else
+                                    MaterialDialogUtil.showErrorDialog(context, response.message)
+                            }
+                        }
+                    })
                 }
 
                 override fun onErrorRefreshPressed() {
@@ -235,6 +274,21 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
             feedAdapter?.submitLoading()
             setData()
             binding.profileSwipeRefresh.isRefreshing = false
+        }
+
+        binding.profileFollowButton.setOnClickListener {
+            userViewModel.followUser(displayUser.id.toString(), token, feedController!!.dialogErrorHandler(it.context)).observe(viewLifecycleOwner){ response ->
+                if (response.status == 200 && response.data != null){
+                    if (isCurrentUser) {
+                        currentUser = response.data
+                        (activity as? MainActivity)?.currentUser = response.data
+                    }else
+                        userModel = response.data
+                    handleFollow()
+                }else{
+                    feedController?.dialogErrorHandler(it.context)?.onError(response.message)
+                }
+            }
         }
     }
 

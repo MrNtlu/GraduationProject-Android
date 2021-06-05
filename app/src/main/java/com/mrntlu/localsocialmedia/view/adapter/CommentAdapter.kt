@@ -17,6 +17,7 @@ import com.bumptech.glide.request.target.Target
 import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.CellCommentBinding
 import com.mrntlu.localsocialmedia.service.model.CommentModel
+import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.utils.isDarkThemeOn
 import com.mrntlu.localsocialmedia.utils.setGone
 import com.mrntlu.localsocialmedia.view.`interface`.Interaction
@@ -26,7 +27,7 @@ import com.mrntlu.localsocialmedia.view.adapter.viewholder.ErrorItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.LoadingItemViewHolder
 import com.mrntlu.localsocialmedia.view.adapter.viewholder.PaginationItemViewHolder
 
-class CommentAdapter(override val interaction: CommentInteraction): BaseAdapter<CommentModel>() {
+class CommentAdapter(private val currentUser: UserModel, override val interaction: CommentInteraction): BaseAdapter<CommentModel>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when(viewType) {
@@ -34,11 +35,11 @@ class CommentAdapter(override val interaction: CommentInteraction): BaseAdapter<
             LOADING.num -> LoadingItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.loading_layout, parent, false))
             ERROR.num -> ErrorItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_error, parent, false))
             PAGINATION.num -> PaginationItemViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_pagination, parent, false))
-            else -> CommentHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_comment, parent, false), interaction)
+            else -> CommentHolder(LayoutInflater.from(parent.context).inflate(R.layout.cell_comment, parent, false), currentUser, interaction)
         }
     }
 
-    class CommentHolder(itemView: View, private val interaction: CommentInteraction?): ItemHolder<CommentModel>(itemView){
+    class CommentHolder(itemView: View, private val currentUser: UserModel, private val interaction: CommentInteraction?): ItemHolder<CommentModel>(itemView){
         val binding = CellCommentBinding.bind(itemView)
 
         override fun bind(item: CommentModel) {
@@ -48,10 +49,17 @@ class CommentAdapter(override val interaction: CommentInteraction): BaseAdapter<
 
             binding.commentMoreButton.setOnClickListener {
                 val popup = PopupMenu(it.context, it)
-                popup.inflate(R.menu.report_menu)
+                popup.inflate(
+                    if (currentUser.id == item.author.id)
+                        R.menu.delete_menu
+                    else
+                        R.menu.report_menu
+                )
                 popup.setOnMenuItemClickListener { menuItem ->
                     if (menuItem.itemId == R.id.reportMenu)
                         interaction?.onReportPressed(adapterPosition, item)
+                    else if (menuItem.itemId == R.id.deleteMenu)
+                        interaction?.onDeletePressed(adapterPosition, item)
                     true
                 }
                 popup.show()
@@ -107,4 +115,5 @@ class CommentAdapter(override val interaction: CommentInteraction): BaseAdapter<
 interface CommentInteraction: Interaction<CommentModel>{
     fun onFavPressed(position: Int, commentModel: CommentModel)
     fun onReportPressed(position: Int, commentModel: CommentModel)
+    fun onDeletePressed(position: Int, commentModel: CommentModel)
 }

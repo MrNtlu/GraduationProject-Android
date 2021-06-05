@@ -17,7 +17,9 @@ data class UserModel(
     @SerializedName("following_count")
     var followingCount: Int,
     @SerializedName("post_count")
-    var postCount: Int
+    var postCount: Int,
+    @SerializedName("is_following")
+    var isFollowing: Boolean
 ) : Parcelable {
 
     val imageUri get() = image?.let {

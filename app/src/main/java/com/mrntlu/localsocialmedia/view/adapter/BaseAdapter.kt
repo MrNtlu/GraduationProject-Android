@@ -114,6 +114,16 @@ abstract class BaseAdapter<T>(open val interaction: Interaction<T>? = null) :
         }
     }
 
+    fun removeItem(position: Int, item: T){
+        if (arrayList.size == 1){
+            arrayList.remove(item)
+            notifyDataSetChanged()
+        }else{
+            arrayList.remove(item)
+            notifyItemRemoved(position)
+        }
+    }
+
     fun updateItem(position: Int, item: T){
         arrayList[position] = item
         notifyItemChanged(position)

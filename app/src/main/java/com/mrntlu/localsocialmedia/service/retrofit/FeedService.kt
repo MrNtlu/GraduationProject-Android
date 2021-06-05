@@ -17,6 +17,9 @@ interface FeedService {
     @GET("feed/user/{user_id}")
     suspend fun getUserFeed(@Path("user_id") userID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<FeedModel>>
 
+    @DELETE("feed/{feed_id}/delete")
+    suspend fun deleteFeed(@Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<Unit>
+
     @GET("feed/location")
     suspend fun getFeedsByLocation(
         @Query("lat") latitude: Float,
@@ -48,6 +51,9 @@ interface FeedService {
 //GET COMMENTS
     @GET("feed/{feed_id}/comments")
     suspend fun getFeedComments(@Path("feed_id") feedID: String, @Query("page") page: Int, @Query("sort") sort: String, @Query("key") token: String): BaseResponse<ArrayList<CommentModel>>
+
+    @DELETE("comment/{comment_id}/delete")
+    suspend fun deleteComment(@Path("comment_id") commentID: String, @Query("key") token: String): BaseResponse<Unit>
 
     @POST("feed/{feed_id}/create")
     suspend fun postComment(@Body body: CommentBody, @Path("feed_id") feedID: String, @Query("key") token: String): BaseResponse<CommentModel>

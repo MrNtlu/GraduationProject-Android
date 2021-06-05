@@ -24,6 +24,9 @@ interface UserService {
     @PUT("user/{user_id}/edit")
     suspend fun updateUserInfo(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<Unit>
 
+    @POST("user/{user_id}/follow")
+    suspend fun followUser(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<UserModel>
+
     @Multipart
     @PUT("user/{user_id}/upload")
     suspend fun uploadUserImage(

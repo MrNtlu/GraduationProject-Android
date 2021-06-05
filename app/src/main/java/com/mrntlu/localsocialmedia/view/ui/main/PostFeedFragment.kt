@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +51,7 @@ class PostFeedFragment : BaseFragment<FragmentPostFeedBinding>(), CoroutinesErro
     private lateinit var mLocation: Location
     private var cancellationToken = CancellationTokenSource()
     private lateinit var direction: Direction
+    private var radius: Double = Double.NaN
 
     companion object {
         const val DIRECTION_ARG = "direction"
@@ -74,6 +76,7 @@ class PostFeedFragment : BaseFragment<FragmentPostFeedBinding>(), CoroutinesErro
         super.onCreate(savedInstanceState)
         arguments?.let {
             direction = Direction.fromInt(it.getInt(DIRECTION_ARG, 0))
+            radius = it.getDouble(HomeFragment.RADIUS_ARG)
         }
     }
 
@@ -177,7 +180,7 @@ class PostFeedFragment : BaseFragment<FragmentPostFeedBinding>(), CoroutinesErro
                                 Direction.FeedFragment -> {
                                     R.id.action_postFeedFragment_to_feedFragment
                                 }
-                            })
+                            }, bundleOf(HomeFragment.RADIUS_ARG to radius))
                     }else
                         onError(response.message)
                 }

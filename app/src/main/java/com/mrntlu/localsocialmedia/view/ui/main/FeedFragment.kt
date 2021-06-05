@@ -85,6 +85,21 @@ class FeedFragment : BaseFragment<FragmentFeedBinding>(), CoroutinesErrorHandler
                     }
                 }
 
+                override fun onDeletePressed(position: Int, feedModel: FeedModel) {
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to DELETE?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.deleteFeed(feedModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                if (response.status == 200) {
+                                    (activity as MainActivity).setLoadingLayout(false)
+                                    feedAdapter?.removeItem(position, feedModel)
+                                }else
+                                    MaterialDialogUtil.showErrorDialog(context, response.message)
+                            }
+                        }
+                    })
+                }
+
                 override fun onErrorRefreshPressed() {
                     feedAdapter?.submitLoading()
                     setData()

@@ -51,7 +51,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     private var mLocation: LatLng? = null
     private var isLoading = false
     private var pageNum = 1
-    private var radius = 10.0
+    private var radius: Double = Double.NaN
+
+    companion object{
+        const val RADIUS_ARG = "radius"
+    }
 
     private val permissionActivityResult = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
         var isPermissionsGranted = false
@@ -68,6 +72,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            radius = it.getDouble(RADIUS_ARG, Double.NaN)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentHomeBinding.inflate(layoutInflater, container,false)
         binding.homeMap.onCreate(savedInstanceState)
@@ -78,6 +89,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).setToolbarBackButton(false)
         setHasOptionsMenu(true)
+
+        if (radius.isNaN())
+            radius = 10.0
+
         feedController = FeedController()
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(view.context)
         setMap()
@@ -155,7 +170,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                     MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to REPORT?", object: DialogButtons{
                         override fun positiveButton() {
                             (activity as MainActivity).setLoadingLayout(true)
-                            viewModel.reportFeed(feedModel.id.toString(), token, this@HomeFragment).observe(viewLifecycleOwner){ response ->
+                            viewModel.reportFeed(feedModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
                                 (activity as MainActivity).setLoadingLayout(false)
                                 MaterialDialogUtil.showInfoDialog(
                                     context,
@@ -178,6 +193,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                         }
                         observer.removeObservers(viewLifecycleOwner)
                     }
+                }
+
+                override fun onDeletePressed(position: Int, feedModel: FeedModel) {
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to DELETE?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.deleteFeed(feedModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                if (response.status == 200) {
+                                    (activity as MainActivity).setLoadingLayout(false)
+                                    feedAdapter?.removeItem(position, feedModel)
+                                }else
+                                    MaterialDialogUtil.showErrorDialog(context, response.message)
+                            }
+                        }
+                    })
                 }
 
                 override fun onErrorRefreshPressed() {
@@ -264,6 +294,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         }
 
         binding.homeZoomOutButton.setOnClickListener {
+            val prevRadius = radius
             if (radius >= 10){ // MIN 10M
                 when (radius) {
                     in 15.0..30.0 -> {
@@ -277,10 +308,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                     }
                 }
             }
-            setCircle()
-            pageNum = 1
-            feedAdapter?.submitLoading()
-            setData()
+            if (prevRadius != radius) {
+                setCircle()
+                pageNum = 1
+                feedAdapter?.submitLoading()
+                setData()
+            }
         }
     }
 
@@ -344,7 +377,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
             R.id.add_menu -> {
                 navController.navigate(
                     R.id.action_homeFragment_to_postFeedFragment,
-                    bundleOf(PostFeedFragment.DIRECTION_ARG to 0)
+                    bundleOf(
+                        PostFeedFragment.DIRECTION_ARG to 0,
+                        RADIUS_ARG to radius
+                    )
                 )
                 true
             }

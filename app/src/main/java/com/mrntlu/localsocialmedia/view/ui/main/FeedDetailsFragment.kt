@@ -87,7 +87,7 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
         binding.commentRV.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             layoutManager = linearLayoutManager
-            commentAdapter = CommentAdapter(object: CommentInteraction{
+            commentAdapter = CommentAdapter(currentUser, object: CommentInteraction{
                 override fun onItemSelected(position: Int, item: CommentModel) {}
 
                 override fun onFavPressed(position: Int, commentModel: CommentModel) {
@@ -116,6 +116,21 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
                                     if (response.status == 200) "Success" else "Error!",
                                     if (response.status == 200) "Thanks for reporting, we will review it as soon as possible." else response.message
                                 )
+                            }
+                        }
+                    })
+                }
+
+                override fun onDeletePressed(position: Int, commentModel: CommentModel) {
+                    MaterialDialogUtil.setDialog(this@apply.context, getString(R.string.are_you_sure), "Do you want to DELETE?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.deleteComment(commentModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                if (response.status == 200) {
+                                    (activity as MainActivity).setLoadingLayout(false)
+                                    commentAdapter?.removeItem(position, commentModel)
+                                }else
+                                    MaterialDialogUtil.showErrorDialog(context, response.message)
                             }
                         }
                     })
@@ -197,7 +212,12 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
 
         feedBinding.feedMoreButton.setOnClickListener {
             val popup = PopupMenu(it.context, it)
-            popup.inflate(R.menu.report_menu)
+            popup.inflate(
+                if (currentUser.id == feedModel.author.id)
+                    R.menu.delete_menu
+                else
+                    R.menu.report_menu
+            )
             popup.setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.reportMenu) {
                     (activity as MainActivity).setLoadingLayout(true)
@@ -209,6 +229,19 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
                             if (response.status == 200) "Thanks for reporting, we will review it as soon as possible." else response.message
                         )
                     }
+                }else if (menuItem.itemId == R.id.deleteMenu) {
+                    MaterialDialogUtil.setDialog(it.context, getString(R.string.are_you_sure), "Do you want to DELETE?", object: DialogButtons{
+                        override fun positiveButton() {
+                            (activity as MainActivity).setLoadingLayout(true)
+                            viewModel.deleteFeed(feedModel.id.toString(), token, feedController!!.dialogErrorHandler(context)).observe(viewLifecycleOwner){ response ->
+                                if (response.status == 200) {
+                                    (activity as MainActivity).setLoadingLayout(false)
+                                    navController.popBackStack()
+                                }else
+                                    MaterialDialogUtil.showErrorDialog(it.context, response.message)
+                            }
+                        }
+                    })
                 }
                 true
             }
