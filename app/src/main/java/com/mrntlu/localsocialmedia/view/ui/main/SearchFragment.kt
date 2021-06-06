@@ -18,7 +18,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setRecyclerView()
+    }
 
+    private fun setRecyclerView() {
+        binding.searchRV.apply {
+
+        }
     }
 
     override fun onDestroyView() {
