@@ -12,6 +12,7 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -37,6 +38,7 @@ import com.mrntlu.localsocialmedia.viewmodel.FeedViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.ln
 
+@SuppressLint("MissingPermission")
 class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler {
 
     private var feedAdapter: FeedAdapter? = null
@@ -44,7 +46,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
     private var feedController: FeedController? = null
-    private var marker: Marker? = null
+    private var markerList: ArrayList<Marker>? = null
     private var circle: Circle? = null
     private var mMap: GoogleMap? = null
     private var cancellationToken = CancellationTokenSource()
@@ -89,6 +91,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).setToolbarBackButton(false)
         setHasOptionsMenu(true)
+        markerList = arrayListOf()
 
         if (radius.isNaN())
             radius = 10.0
@@ -115,17 +118,39 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                 isZoomGesturesEnabled = false
                 isRotateGesturesEnabled = false
                 isTiltGesturesEnabled = false
+                isMapToolbarEnabled = false
+            }
+
+            mMap?.setOnMarkerClickListener { marker ->
+                (marker.tag as? FeedModel)?.let {
+                    navController.navigate(R.id.action_homeFragment_to_feedDetailsFragment, bundleOf(
+                        FeedDetailsFragment.FEED_MODEL_ARG to it
+                    ))
+                }
+
+                true
             }
         }
     }
 
-    private fun setMarker() {
-        if (mLocation != null){
-            mMap?.let {
-                marker?.remove()
-                marker = it.addMarker(MarkerOptions()
-                    .position(mLocation!!)
-                    .title("Your Position"))
+    private fun setMarker(isPaginating: Boolean, newFeedList: ArrayList<FeedModel>) {
+        mMap?.let {
+            if (!isPaginating) {
+                for (marker in markerList!!)
+                    marker.remove()
+                markerList!!.clear()
+            }
+
+            for (feed in newFeedList){
+                val location = LatLng(feed.latitude.toDouble(), feed.longitude.toDouble())
+                val marker = it.addMarker(MarkerOptions()
+                    .position(location)
+                    .title(feed.locationName ?: "Feed")
+                    .snippet(feed.message))
+                marker?.tag = feed
+                marker?.let {  m ->
+                    markerList!!.add(m)
+                }
             }
         }
     }
@@ -139,8 +164,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                 circle = it.addCircle(CircleOptions()
                     .center(mLocation!!)
                     .radius(radius)
-                    .strokeColor(Color.RED)
-                    .fillColor(Color.WHITE))
+                    .strokeColor(Color.parseColor("#ACC3E9"))
+                    .fillColor(Color.parseColor("#40ACC3E9")))
                 it.animateCamera(CameraUpdateFactory.newLatLngZoom(circle!!.center, getZoomLevel(circle!!)))
             }
         }
@@ -247,10 +272,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         viewModel.setFeedByLocation().observe(viewLifecycleOwner){
             if (it.status == 200){
                 it.data?.let { data ->
-                    if (pageNum <= 1)
+                    if (pageNum <= 1) {
+                        setMarker(false, data)
                         feedAdapter?.submitList(data)
-                    else {
+                    }else {
                         isLoading = false
+                        setMarker(true, data)
                         feedAdapter?.updateList(data)
                     }
                 } ?: feedAdapter?.submitPaginationError()
@@ -274,6 +301,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         }
 
         binding.homeZoomInButton.setOnClickListener {
+            val prevRadius = radius
             if (radius <= 200){ // MAX 200M
                 when (radius) {
                     in 10.0..25.0 -> {
@@ -287,10 +315,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
                     }
                 }
             }
-            setCircle()
-            pageNum = 1
-            feedAdapter?.submitLoading()
-            setData()
+            if (prevRadius != radius) {
+                setCircle()
+                pageNum = 1
+                feedAdapter?.submitLoading()
+                setData()
+            }
         }
 
         binding.homeZoomOutButton.setOnClickListener {
@@ -334,7 +364,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         permissionActivityResult.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
     }
 
-    @SuppressLint("MissingPermission")
     private fun getLastKnownUserLocation(context: Context) {
         if (!checkPermissions(context))
             requestPermission()
@@ -347,7 +376,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun requestUserLocation(){
         val loadingText = "Please wait while we are getting your location..."
         binding.homeLoadingLayout.textView.text = loadingText
@@ -362,8 +390,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
 
     private fun onUserLocationReceivedHandler(location: Location){
         mLocation = LatLng(location.latitude, location.longitude)
+        mMap?.isMyLocationEnabled = true
         setData()
-        setMarker()
         setCircle()
     }
 
@@ -427,8 +455,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(), CoroutinesErrorHandler
         feedController = null
         circle?.remove()
         circle = null
-        marker?.remove()
-        marker = null
+        for (marker in markerList!!)
+            marker.remove()
+        markerList = null
         mMap?.clear()
         mMap = null
         binding.homeMap.onDestroy()

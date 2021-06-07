@@ -4,6 +4,7 @@ import com.google.gson.JsonObject
 import com.mrntlu.localsocialmedia.service.model.UserFollowModel
 import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.UserSearchResponse
 import okhttp3.MultipartBody
 import retrofit2.http.*
 
@@ -13,7 +14,7 @@ interface UserService {
     suspend fun getUserInfo(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<UserModel>
 
     @GET("user")
-    suspend fun searchUser(@Query("search") search: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<UserModel>
+    suspend fun searchUser(@Query("search") search: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<UserSearchResponse>
 
     @GET("user/{user_id}/followers")
     suspend fun getUserFollowers(@Path("user_id") userID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<UserFollowModel>>
