@@ -14,7 +14,7 @@ interface UserService {
     suspend fun getUserInfo(@Path("user_id") userID: String, @Query("key") token: String): BaseResponse<UserModel>
 
     @GET("user")
-    suspend fun searchUser(@Query("search") search: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<UserSearchResponse>
+    suspend fun searchUser(@Query("search") search: String, @Query("page") page: Int, @Query("key") token: String): UserSearchResponse
 
     @GET("user/{user_id}/followers")
     suspend fun getUserFollowers(@Path("user_id") userID: String, @Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<UserFollowModel>>

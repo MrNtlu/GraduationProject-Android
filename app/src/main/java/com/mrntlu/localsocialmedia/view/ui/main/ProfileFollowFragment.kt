@@ -1,14 +1,10 @@
 package com.mrntlu.localsocialmedia.view.ui.main
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import com.mrntlu.localsocialmedia.databinding.FragmentProfileFollowBinding
-import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.utils.setToolbarBackButton
 import com.mrntlu.localsocialmedia.view.adapter.viewpager.ProfileFollowPagerAdapter
 import kotlin.properties.Delegates
@@ -16,15 +12,18 @@ import kotlin.properties.Delegates
 class ProfileFollowFragment : BaseFragment<FragmentProfileFollowBinding>() {
 
     private var userID by Delegates.notNull<Int>()
+    private var isFollowing = false
 
     companion object{
         const val USERID_ARG = "userID"
+        const val IS_FOLLOWING_ARG = "isFollowing"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             userID = it.getInt(USERID_ARG)
+            isFollowing = it.getBoolean(IS_FOLLOWING_ARG)
         }
     }
 
@@ -44,5 +43,9 @@ class ProfileFollowFragment : BaseFragment<FragmentProfileFollowBinding>() {
         val pagerAdapter = ProfileFollowPagerAdapter(view.context, childFragmentManager, userID)
         binding.profileViewPager.adapter = pagerAdapter
         binding.profileTabLayout.setupWithViewPager(binding.profileViewPager)
+        if (isFollowing) {
+            val tab = binding.profileTabLayout.getTabAt(1)
+            tab?.select()
+        }
     }
 }

@@ -11,16 +11,19 @@ import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.tabs.TabLayoutMediator
 import com.mrntlu.localsocialmedia.R
 import com.mrntlu.localsocialmedia.databinding.CellFeedBinding
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.UserVoteModel
 import com.mrntlu.localsocialmedia.service.model.VoteType
+import com.mrntlu.localsocialmedia.view.adapter.FeedImageListViewPagerAdapter
 import com.mrntlu.localsocialmedia.view.ui.main.MainActivity
 import java.util.*
 import kotlin.math.roundToInt
@@ -153,6 +156,21 @@ fun CellFeedBinding.setUI(feedModel: FeedModel, isDetailsPage: Boolean = false){
             } ?: postedDate.convertToDate()
         }
         feedVoteText.text = (upvoteCount - downvoteCount).toString()
+        feedSpamLayout.isVisible = isSpam
+
+        printLog("$images")
+        if (images.isNotEmpty()) {
+            feedCardView.setVisible()
+            feedImageViewPager.apply {
+                this.adapter = FeedImageListViewPagerAdapter(feedModel)
+                if (images.size > 1) {
+                    imageIndicatorTabLayout.setVisible()
+                    TabLayoutMediator(imageIndicatorTabLayout, this) { _, _ -> }.attach()
+                } else
+                    imageIndicatorTabLayout.setGone()
+            }
+        }else
+            feedCardView.setGone()
     }
 }
 

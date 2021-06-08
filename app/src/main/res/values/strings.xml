@@ -53,4 +53,7 @@
     <string name="post_feed_hint">Whats happening?</string>
     <string name="comment_hint">What do you think?</string>
     <string name="delete">Delete</string>
+    <string name="spam_information">This feed might contain misleading information!</string>
+    <string name="radius_">Radius:</string>
+    <string name="add_image">Add Image</string>
 </resources>

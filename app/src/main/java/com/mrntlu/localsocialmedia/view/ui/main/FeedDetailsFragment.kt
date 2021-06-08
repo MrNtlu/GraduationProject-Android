@@ -295,6 +295,7 @@ class FeedDetailsFragment : BaseFragment<FragmentFeedDetailsBinding>(), Coroutin
             if (response.status == 200 && response.data != null){
                 feedModel = response.data
                 feedBinding.setVoteUI(context, feedModel.userVote)
+                feedBinding.feedVoteText.text = (feedModel.upvoteCount - feedModel.downvoteCount).toString()
             }
             observer.removeObservers(viewLifecycleOwner)
         }

@@ -16,7 +16,7 @@
         android:contentDescription="@string/error_refresh"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_baseline_refresh_24"
-        android:tint="?attr/contentTextColor"
+        app:tint="?attr/contentTextColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

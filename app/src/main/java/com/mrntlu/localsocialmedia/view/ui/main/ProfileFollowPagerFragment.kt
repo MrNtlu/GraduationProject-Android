@@ -66,7 +66,7 @@ class ProfileFollowPagerFragment(private val pagerType: PagerType, private val u
             })
             adapter = followAdapter
 
-            var isScrolling=false
+            var isScrolling = false
             addOnScrollListener(object: RecyclerView.OnScrollListener(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)

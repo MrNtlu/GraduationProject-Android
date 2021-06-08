@@ -1,11 +1,14 @@
 package com.mrntlu.localsocialmedia.service.retrofit
 
+import android.net.Uri
 import com.mrntlu.localsocialmedia.service.model.CommentModel
 import com.mrntlu.localsocialmedia.service.model.FeedModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.VoteBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.CommentBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitbody.feed.FeedBody
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 interface FeedService {
@@ -32,8 +35,16 @@ interface FeedService {
     @GET("feed/follow")
     suspend fun getFeedByFollowings(@Query("page") page: Int, @Query("key") token: String): BaseResponse<ArrayList<FeedModel>>
 
+    @Multipart
     @POST("create/feed")
-    suspend fun postFeed(@Body body: FeedBody, @Query("key") token: String): BaseResponse<FeedModel>
+    suspend fun postFeed(
+        @Part("message") message: RequestBody,
+        @Part("type") type: RequestBody,
+        @Part("latitude") latitude: RequestBody,
+        @Part("longitude") longitude: RequestBody,
+        @Part("locationName") locationName: RequestBody,
+        @Part images: ArrayList<MultipartBody.Part>?,
+        @Query("key") token: String): BaseResponse<FeedModel>
 
 //HANDLE VOTE REPORT
     @POST("feed/{feed_id}/vote")

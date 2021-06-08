@@ -265,7 +265,8 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding>(), CoroutinesErrorH
 
         binding.profileFollowingLayout.setOnClickListener {
             navController.navigate(R.id.action_profileFragment_to_profileFollowFragment, bundleOf(
-                ProfileFollowFragment.USERID_ARG to (displayUser.id)
+                ProfileFollowFragment.USERID_ARG to (displayUser.id),
+                ProfileFollowFragment.IS_FOLLOWING_ARG to true
             ))
         }
 

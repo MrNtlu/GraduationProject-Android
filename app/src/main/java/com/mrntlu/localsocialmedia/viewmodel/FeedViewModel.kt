@@ -13,6 +13,8 @@ import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.
 import com.mrntlu.localsocialmedia.service.retrofit.FeedService
 import com.mrntlu.localsocialmedia.service.retrofit.RetrofitClient
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -74,8 +76,15 @@ class FeedViewModel(application: Application): BaseViewModel(application) {
     }
 
     //POST, PUT, DELETE
-    fun postFeed(body: FeedBody, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
-        apiClient.postFeed(body, token)
+    fun postFeed(
+        message: RequestBody,
+        type: RequestBody,
+        latitude: RequestBody,
+        longitude: RequestBody,
+        locationName: RequestBody,
+        images: ArrayList<MultipartBody.Part>?,
+        token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
+        apiClient.postFeed(message, type, latitude, longitude, locationName, images, token)
     }
 
     fun voteFeed(body: VoteBody, feedID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){

@@ -42,7 +42,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp"
-                        android:text="Radius:"
+                        android:text="@string/radius_"
                         android:textColor="@color/black"
                         android:textSize="12sp"
                         android:textStyle="bold"
@@ -66,15 +66,19 @@
                         tools:text="120m" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <LinearLayout
+                <androidx.cardview.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="12dp"
                     android:layout_marginBottom="4dp"
                     android:orientation="vertical"
+                    app:cardCornerRadius="4dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent">
-
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
                     <ImageButton
                         android:id="@+id/homeZoomInButton"
                         android:layout_width="35dp"
@@ -90,7 +94,8 @@
                         android:background="@color/colorAccent"
                         android:src="@drawable/ic_minus_24"
                         app:tint="@color/white" />
-                </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>

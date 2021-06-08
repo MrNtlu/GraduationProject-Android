@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.mrntlu.localsocialmedia.service.model.UserFollowModel
+import com.mrntlu.localsocialmedia.service.model.UserModel
 import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.BaseResponse
+import com.mrntlu.localsocialmedia.service.model.retrofitmodel.retrofitresponse.UserSearchResponse
 import com.mrntlu.localsocialmedia.service.retrofit.RetrofitClient
 import com.mrntlu.localsocialmedia.service.retrofit.UserService
 import com.mrntlu.localsocialmedia.view.`interface`.CoroutinesErrorHandler
@@ -17,13 +19,19 @@ class UserViewModel(application: Application): BaseViewModel(application) {
     private val apiClient = RetrofitClient.getClient().create(UserService::class.java)
     private lateinit var followingsLiveData: MutableLiveData<BaseResponse<ArrayList<UserFollowModel>>>
     private lateinit var followersLiveData: MutableLiveData<BaseResponse<ArrayList<UserFollowModel>>>
+    private lateinit var userLiveData: MutableLiveData<UserSearchResponse>
 
     fun getUserInfo(userID: String, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) = baseRequest(coroutinesErrorHandler){
         apiClient.getUserInfo(userID, token)
     }
 
+    fun searchUserObserver(): LiveData<UserSearchResponse> {
+        userLiveData = MutableLiveData()
+        return userLiveData
+    }
+
     fun searchUser(search: String, page: Int, token: String, coroutinesErrorHandler: CoroutinesErrorHandler) =
-        baseRequest(coroutinesErrorHandler){
+        basePaginationRequest(userLiveData, coroutinesErrorHandler){
             apiClient.searchUser(search, page, token)
         }
 

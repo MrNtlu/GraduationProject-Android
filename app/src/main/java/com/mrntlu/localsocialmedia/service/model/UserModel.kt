@@ -8,7 +8,8 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class UserModel(
     val id: Int,
-    private val image: String?,
+    @SerializedName("image")
+    var _image: String?,
     val email: String,
     val username: String,
     var name: String,
@@ -22,7 +23,7 @@ data class UserModel(
     var isFollowing: Boolean
 ) : Parcelable {
 
-    val imageUri get() = image?.let {
+    val imageUri get() = _image?.let {
         "${Constants.URL}$it"
     }
 }

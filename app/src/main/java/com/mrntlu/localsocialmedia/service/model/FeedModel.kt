@@ -2,6 +2,7 @@ package com.mrntlu.localsocialmedia.service.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.mrntlu.localsocialmedia.utils.Constants
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -16,7 +17,7 @@ data class FeedModel(
     val latitude: Float,
     val longitude: Float,
     val locationName: String?,
-    val images: List<String>,
+    val images: List<ImageModel>,
     val votes: List<FeedVoteModel>,
     @SerializedName("upvote_count")
     var upvoteCount: Int,
@@ -28,7 +29,16 @@ data class FeedModel(
 ): Parcelable {
 
     val feedType get() = FeedType.valueOf(type)
+
+    val imageUris get() = images.map {
+        "${Constants.URL}${it.image}"
+    }
 }
+
+@Parcelize
+data class ImageModel(
+    val image: String
+): Parcelable
 
 @Parcelize
 data class UserVoteModel(
